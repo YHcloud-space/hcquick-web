@@ -167,7 +167,7 @@ function renderMenu() {
             <div class="menu-item" onclick="handleSync()">🔄 同步</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
-            <div class="menu-item" onclick="()">⚙️ 设置</div>
+            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
         `;
     } else {
         menu.innerHTML = `
@@ -177,7 +177,7 @@ function renderMenu() {
             <div class="menu-item" onclick="handleSync()">🔄 同步</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
-            <div class="menu-item" onclick="()">⚙️ 设置</div>
+            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
         `;
     }
 }
