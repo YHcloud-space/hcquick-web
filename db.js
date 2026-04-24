@@ -1,6 +1,6 @@
 // ==================== IndexedDB 数据库模块 ====================
 const DB_NAME = 'hcquick_db';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // 版本升级
 
 let db = null;
 
@@ -21,6 +21,10 @@ function openDB() {
       }
       if (!db.objectStoreNames.contains('metadata')) {
         db.createObjectStore('metadata', { keyPath: 'key' });
+      }
+      // 新增：本地操作日志
+      if (!db.objectStoreNames.contains('pending_operations')) {
+        db.createObjectStore('pending_operations', { keyPath: 'id', autoIncrement: true });
       }
     };
     
@@ -77,5 +81,37 @@ function putMeta(key, value) {
     store.put({ key, value });
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+  });
+}
+// 新增：插入日志
+function addLog(operation) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending_operations', 'readwrite');
+    const store = tx.objectStore('pending_operations');
+    const request = store.add(operation);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// 新增：获取所有日志
+function getAllLogs() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending_operations', 'readonly');
+    const store = tx.objectStore('pending_operations');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// 新增：清空日志
+function clearAllLogs() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('pending_operations', 'clear');
+    const store = tx.objectStore('pending_operations');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
   });
 }
