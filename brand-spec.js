@@ -473,3 +473,174 @@ function exportJson() {
     loadData().catch(() => {});
   }
 })();
+
+
+// ==================== 规格上下文菜单 ====================
+function showSpecContextMenu(spec, element) {
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+    menu.innerHTML = `
+        <div class="context-item" onclick="editSpec(${spec.id})">编辑</div>
+        <div class="divider"></div>
+        <div class="context-item" style="color:#E53935;" onclick="deleteSpec(${spec.id})">删除</div>
+    `;
+    document.body.appendChild(menu);
+    
+    const rect = element.getBoundingClientRect();
+    menu.style.left = rect.left + 'px';
+    menu.style.top = rect.bottom + 4 + 'px';
+    menu.style.display = 'block';
+    
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 100);
+}
+
+async function editSpec(id) {
+    const spec = specsData.find(s => s.id === id);
+    const newSort = prompt('编辑规格数字：', spec.sort_number);
+    if (newSort && !isNaN(parseInt(newSort))) {
+        await openDB();
+        const updated = {
+            ...spec,
+            sort_number: parseInt(newSort),
+            name: `${brandsData.find(b => b.id === spec.brand_id)?.name} ${newSort}`,
+            updated_at: Math.floor(Date.now() / 1000)
+        };
+        const tx = db.transaction('specs', 'readwrite');
+        const store = tx.objectStore('specs');
+        await new Promise((resolve, reject) => {
+            const request = store.put(updated);
+            request.onsuccess = resolve;
+            request.onerror = reject;
+        });
+        
+        const logData = {
+            type: 'UPDATE',
+            table: 'specs',
+            path: `${currentLine} 线 > ${brandsData.find(b => b.id === spec.brand_id)?.name} > ${spec.name}`,
+            changes: { '排序': { old: spec.sort_number, new: updated.sort_number } }
+        };
+        await addLog({
+            operation_type: 'UPDATE',
+            table_name: 'specs',
+            data_json: JSON.stringify(logData),
+            created_at: Math.floor(Date.now() / 1000)
+        });
+        
+        specsData = await getAll('specs');
+        renderSpecs();
+    }
+    document.querySelector('.context-menu')?.remove();
+}
+
+async function deleteSpec(id) {
+    if (!confirm('确定删除该规格吗？')) return;
+    const spec = specsData.find(s => s.id === id);
+    await openDB();
+    const tx = db.transaction('specs', 'readwrite');
+    const store = tx.objectStore('specs');
+    await new Promise((resolve, reject) => {
+        const request = store.delete(id);
+        request.onsuccess = resolve;
+        request.onerror = reject;
+    });
+    
+    const logData = {
+        type: 'DELETE',
+        table: 'specs',
+        path: `${currentLine} 线 > ${brandsData.find(b => b.id === spec.brand_id)?.name} > ${spec.name}`,
+        deleted_data: spec
+    };
+    await addLog({
+        operation_type: 'DELETE',
+        table_name: 'specs',
+        data_json: JSON.stringify(logData),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    
+    specsData = await getAll('specs');
+    renderSpecs();
+    document.querySelector('.context-menu')?.remove();
+}
+
+async function showAddSpecDialog() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    if (!selectedBrandId) {
+        alert('请先选择一个品牌');
+        return;
+    }
+    const sort = prompt('请输入规格数字：');
+    if (sort && !isNaN(parseInt(sort))) {
+        await openDB();
+        const all = await getAll('specs');
+        const maxId = all.reduce((max, s) => Math.max(max, s.id || 0), 0);
+        const brand = brandsData.find(b => b.id === selectedBrandId);
+        const newSpec = {
+            id: maxId + 1,
+            brand_id: selectedBrandId,
+            name: `${brand.name} ${sort}`,
+            sort_number: parseInt(sort),
+            created_at: Math.floor(Date.now() / 1000),
+            updated_at: Math.floor(Date.now() / 1000)
+        };
+        const tx = db.transaction('specs', 'readwrite');
+        const store = tx.objectStore('specs');
+        await new Promise((resolve, reject) => {
+            const request = store.add(newSpec);
+            request.onsuccess = resolve;
+            request.onerror = reject;
+        });
+        
+        const logData = {
+            type: 'INSERT',
+            table: 'specs',
+            path: `${currentLine} 线 > ${brand.name} > ${newSpec.name}`,
+            data: newSpec
+        };
+        await addLog({
+            operation_type: 'INSERT',
+            table_name: 'specs',
+            data_json: JSON.stringify(logData),
+            created_at: Math.floor(Date.now() / 1000)
+        });
+        
+        specsData = await getAll('specs');
+        renderSpecs();
+    }
+}
+
+// ==================== 同步确认弹窗 ====================
+function showSyncConfirmDialog(logs) {
+    const overlay = document.getElementById('sync-confirm-overlay');
+    const list = document.getElementById('sync-confirm-list');
+    
+    list.innerHTML = logs.slice(0, 10).map(log => {
+        try {
+            const data = JSON.parse(log.data_json);
+            return `<div>• ${data.type}: ${data.path}</div>`;
+        } catch {
+            return `<div>• 未知操作</div>`;
+        }
+    }).join('');
+    
+    if (logs.length > 10) {
+        list.innerHTML += `<div style="color:#888;margin-top:4px;">... 共 ${logs.length} 条修改记录</div>`;
+    }
+    
+    overlay.style.display = 'flex';
+}
+
+document.getElementById('sync-confirm-cancel').addEventListener('click', () => {
+    document.getElementById('sync-confirm-overlay').style.display = 'none';
+});
+
+document.getElementById('sync-confirm-ok').addEventListener('click', async () => {
+    document.getElementById('sync-confirm-overlay').style.display = 'none';
+    await loadData();
+});
