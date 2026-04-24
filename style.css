@@ -312,3 +312,48 @@ body {
     font-size: 14px;
     cursor: pointer;
 }
+/* 下拉菜单 */
+#dropdown-menu {
+    position: absolute;
+    top: 45px;
+    right: 8px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 500;
+    min-width: 160px;
+    padding: 4px 0;
+}
+.menu-item {
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+.menu-item:hover { background: #F5F5F5; }
+.divider { height: 1px; background: #E5E5E5; margin: 4px 0; }
+
+/* 设置对话框 */
+#settings-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#settings-dialog {
+    background: #FFFFFF;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    padding: 16px;
+}
+#settings-title {
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 12px;
+}
