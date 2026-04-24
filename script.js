@@ -107,11 +107,63 @@ function renderBrands() {
     brandGrid.querySelectorAll('.grid-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             selectedBrandId = parseInt(btn.dataset.brandId);
+            function renderBrands() {
+    const filtered = brandsData.filter(b => b.line_code === currentLine);
+    if (filtered.length === 0) {
+        brandGrid.innerHTML = '<span class="hint">暂无品牌</span>';
+        return;
+    }
+    brandGrid.innerHTML = filtered.map(b => `
+        <button class="grid-btn ${b.id === selectedBrandId ? 'selected' : ''}"
+                data-brand-id="${b.id}">
+            ${b.name}
+        </button>
+    `).join('');
+    
+    // 绑定点击事件
+    brandGrid.querySelectorAll('.grid-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedBrandId = parseInt(btn.dataset.brandId);
             renderBrands();
             renderSpecs();
         });
+        // 长按事件
+        bindLongPress(btn, () => {
+            const brand = brandsData.find(b => b.id === parseInt(btn.dataset.brandId));
+            showBrandContextMenu(brand, btn);
+        });
     });
 }
+            function renderSpecs() {
+    if (!selectedBrandId) {
+        specGrid.innerHTML = '<span class="hint">请先选择一个品牌</span>';
+        return;
+    }
+    const filtered = specsData.filter(s => s.brand_id === selectedBrandId);
+    if (filtered.length === 0) {
+        specGrid.innerHTML = '<span class="hint">暂无规格</span>';
+        return;
+    }
+    specGrid.innerHTML = filtered.map(s => `
+        <button class="grid-btn ${s.id === selectedSpecId ? 'selected' : ''}"
+                data-spec-id="${s.id}">
+            ${s.name}
+        </button>
+    `).join('');
+    
+    specGrid.querySelectorAll('.grid-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedSpecId = parseInt(btn.dataset.specId);
+            enterCalcPage();
+        });
+        // 长按事件
+        bindLongPress(btn, () => {
+            const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
+            showSpecContextMenu(spec, btn);
+        });
+    });
+}
+        
 
 // ==================== 规格渲染 ====================
 function renderSpecs() {
@@ -157,11 +209,200 @@ lineBtns.forEach(btn => {
 
 // ==================== 菜单功能 ====================
 let menuVisible = false;
+let isInCalcPage = false;
+
+function renderMenu() {
+    const menu = document.getElementById('dropdown-menu');
+    if (isInCalcPage) {
+        // 计算页菜单：同步、日志、设置
+        menu.innerHTML = `
+            <div class="menu-item" onclick="handleSync()">🔄 同步</div>
+            <div class="divider"></div>
+            <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
+            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
+        `;
+    } else {
+        // 品牌规格页菜单：增加品牌/规格、同步、日志、设置
+        menu.innerHTML = `
+            <div class="menu-item" onclick="showAddBrandDialog()">+ 增加品牌</div>
+            <div class="menu-item" onclick="showAddSpecDialog()">+ 增加规格</div>
+            <div class="divider"></div>
+            <div class="menu-item" onclick="handleSync()">🔄 同步</div>
+            <div class="divider"></div>
+            <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
+            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
+        `;
+    }
+}
+          // ==================== 长按工具 ====================
+function bindLongPress(element, callback) {
+    let timer;
+    element.addEventListener('touchstart', (e) => {
+        timer = setTimeout(() => {
+            callback();
+            clearTimeout(timer);
+        }, 500); // 500ms 长按
+    });
+    element.addEventListener('touchend', () => clearTimeout(timer));
+    element.addEventListener('touchmove', () => clearTimeout(timer));
+}
+
+// ==================== 品牌上下文菜单 ====================
+function showBrandContextMenu(brand, element) {
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+    menu.innerHTML = `
+        <div class="context-item" onclick="editBrand(${brand.id})">编辑</div>
+        <div class="divider"></div>
+        <div class="context-item" style="color:#E53935;" onclick="deleteBrand(${brand.id})">删除</div>
+    `;
+    document.body.appendChild(menu);
+    
+    // 定位
+    const rect = element.getBoundingClientRect();
+    menu.style.left = rect.left + 'px';
+    menu.style.top = rect.bottom + 4 + 'px';
+    menu.style.display = 'block';
+    
+    // 点击外部关闭
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 100);
+}
+
+// ==================== 品牌编辑/删除 ====================
+async function editBrand(id) {
+    const brand = brandsData.find(b => b.id === id);
+    const newName = prompt('编辑品牌名称：', brand.name);
+    if (newName && newName.trim() !== '') {
+        await openDB();
+        const tx = db.transaction('brands', 'readwrite');
+        const store = tx.objectStore('brands');
+        const updated = { ...brand, name: newName.trim(), updated_at: Math.floor(Date.now() / 1000) };
+        await new Promise((resolve, reject) => {
+            const request = store.put(updated);
+            request.onsuccess = resolve;
+            request.onerror = reject;
+        });
+        
+        // 记录日志
+        const logData = {
+            type: 'UPDATE',
+            table: 'brands',
+            path: `${brand.line_code} 线 > ${brand.name}`,
+            changes: { '名称': { old: brand.name, new: updated.name } }
+        };
+        await addLog({
+            operation_type: 'UPDATE',
+            table_name: 'brands',
+            data_json: JSON.stringify(logData),
+            created_at: Math.floor(Date.now() / 1000)
+        });
+        
+        // 刷新数据
+        brandsData = await getAll('brands');
+        renderBrands();
+        if (selectedBrandId === id) {
+            renderSpecs(); // 刷新规格（如果有）
+        }
+    }
+    // 移除上下文菜单
+    document.querySelector('.context-menu')?.remove();
+}
+
+async function deleteBrand(id) {
+    if (!confirm('确定删除该品牌吗？')) return;
+    const brand = brandsData.find(b => b.id === id);
+    await openDB();
+    const tx = db.transaction('brands', 'readwrite');
+    const store = tx.objectStore('brands');
+    await new Promise((resolve, reject) => {
+        const request = store.delete(id);
+        request.onsuccess = resolve;
+        request.onerror = reject;
+    });
+    
+    // 记录日志
+    const logData = {
+        type: 'DELETE',
+        table: 'brands',
+        path: `${brand.line_code} 线 > ${brand.name}`,
+        deleted_data: brand
+    };
+    await addLog({
+        operation_type: 'DELETE',
+        table_name: 'brands',
+        data_json: JSON.stringify(logData),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    
+    brandsData = await getAll('brands');
+    if (selectedBrandId === id) selectedBrandId = null;
+    renderBrands();
+    renderSpecs();
+    document.querySelector('.context-menu')?.remove();
+}
+
+// ==================== 新增品牌 ====================
+async function showAddBrandDialog() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    const name = prompt('请输入新品牌名称（1-15字符）：');
+    if (name && name.trim() !== '') {
+        await openDB();
+        const newBrand = {
+            line_code: currentLine,
+            name: name.trim(),
+            sort_order: 0,
+            created_at: Math.floor(Date.now() / 1000),
+            updated_at: Math.floor(Date.now() / 1000)
+        };
+        // 获取新 ID（简单处理：取最大值+1）
+        const all = await getAll('brands');
+        const maxId = all.reduce((max, b) => Math.max(max, b.id || 0), 0);
+        newBrand.id = maxId + 1;
+        
+        const tx = db.transaction('brands', 'readwrite');
+        const store = tx.objectStore('brands');
+        await new Promise((resolve, reject) => {
+            const request = store.add(newBrand);
+            request.onsuccess = resolve;
+            request.onerror = reject;
+        });
+        
+        // 记录日志
+        const logData = {
+            type: 'INSERT',
+            table: 'brands',
+            path: `${currentLine} 线 > ${newBrand.name}`,
+            data: newBrand
+        };
+        await addLog({
+            operation_type: 'INSERT',
+            table_name: 'brands',
+            data_json: JSON.stringify(logData),
+            created_at: Math.floor(Date.now() / 1000)
+        });
+        
+        brandsData = await getAll('brands');
+        renderBrands();
+    }
+}
 
 menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    menuVisible = !menuVisible;
-    document.getElementById('dropdown-menu').style.display = menuVisible ? 'block' : 'none';
+    if (!menuVisible) {
+        renderMenu();
+        menuVisible = true;
+        document.getElementById('dropdown-menu').style.display = 'block';
+    } else {
+        menuVisible = false;
+        document.getElementById('dropdown-menu').style.display = 'none';
+    }
 });
 
 document.addEventListener('click', () => {
@@ -172,7 +413,22 @@ document.addEventListener('click', () => {
 function handleSync() {
     menuVisible = false;
     document.getElementById('dropdown-menu').style.display = 'none';
-    loadData();
+    // 检查本地日志，有则弹窗确认，无则直接同步
+    checkAndSync();
+}
+
+async function checkAndSync() {
+    try {
+        const logs = await getAllLogs();
+        if (logs.length > 0) {
+            showSyncConfirmDialog(logs);
+        } else {
+            await loadData();
+        }
+    } catch (e) {
+        console.error('检查日志失败:', e);
+        await loadData(); // 降级：直接同步
+    }
 }
 
 // ==================== 设置对话框 ====================
@@ -278,6 +534,7 @@ specGrid.addEventListener('click', (e) => {
 });
 
 function enterCalcPage() {
+    isInCalcPage = true;
     const spec = specsData.find(s => s.id === selectedSpecId);
     const brand = brandsData.find(b => b.id === spec?.brand_id);
     titleEl.textContent = `${currentLine}线 - ${spec?.name || ''}`;
@@ -296,6 +553,7 @@ function enterCalcPage() {
 }
 
 function backToBrandSpec() {
+    isInCalcPage = false;
     // 隐藏计算页，显示品牌规格页
     calcPage.style.display = 'none';
     document.getElementById('brand-spec-page').style.display = 'block';
@@ -333,7 +591,145 @@ function renderMaterials() {
         });
     });
 }
+// ==================== 规格上下文菜单 ====================
+function showSpecContextMenu(spec, element) {
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+    menu.innerHTML = `
+        <div class="context-item" onclick="editSpec(${spec.id})">编辑</div>
+        <div class="divider"></div>
+        <div class="context-item" style="color:#E53935;" onclick="deleteSpec(${spec.id})">删除</div>
+    `;
+    document.body.appendChild(menu);
+    
+    const rect = element.getBoundingClientRect();
+    menu.style.left = rect.left + 'px';
+    menu.style.top = rect.bottom + 4 + 'px';
+    menu.style.display = 'block';
+    
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 100);
+}
 
+async function editSpec(id) {
+    const spec = specsData.find(s => s.id === id);
+    const newSort = prompt('编辑规格数字：', spec.sort_number);
+    if (newSort && !isNaN(parseInt(newSort))) {
+        await openDB();
+        const updated = {
+            ...spec,
+            sort_number: parseInt(newSort),
+            name: `${brandsData.find(b => b.id === spec.brand_id)?.name} ${newSort}`,
+            updated_at: Math.floor(Date.now() / 1000)
+        };
+        const tx = db.transaction('specs', 'readwrite');
+        const store = tx.objectStore('specs');
+        await new Promise((resolve, reject) => {
+            const request = store.put(updated);
+            request.onsuccess = resolve;
+            request.onerror = reject;
+        });
+        
+        const logData = {
+            type: 'UPDATE',
+            table: 'specs',
+            path: `${currentLine} 线 > ${brandsData.find(b => b.id === spec.brand_id)?.name} > ${spec.name}`,
+            changes: { '排序': { old: spec.sort_number, new: updated.sort_number } }
+        };
+        await addLog({
+            operation_type: 'UPDATE',
+            table_name: 'specs',
+            data_json: JSON.stringify(logData),
+            created_at: Math.floor(Date.now() / 1000)
+        });
+        
+        specsData = await getAll('specs');
+        renderSpecs();
+    }
+    document.querySelector('.context-menu')?.remove();
+}
+
+async function deleteSpec(id) {
+    if (!confirm('确定删除该规格吗？')) return;
+    const spec = specsData.find(s => s.id === id);
+    await openDB();
+    const tx = db.transaction('specs', 'readwrite');
+    const store = tx.objectStore('specs');
+    await new Promise((resolve, reject) => {
+        const request = store.delete(id);
+        request.onsuccess = resolve;
+        request.onerror = reject;
+    });
+    
+    const logData = {
+        type: 'DELETE',
+        table: 'specs',
+        path: `${currentLine} 线 > ${brandsData.find(b => b.id === spec.brand_id)?.name} > ${spec.name}`,
+        deleted_data: spec
+    };
+    await addLog({
+        operation_type: 'DELETE',
+        table_name: 'specs',
+        data_json: JSON.stringify(logData),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    
+    specsData = await getAll('specs');
+    renderSpecs();
+    document.querySelector('.context-menu')?.remove();
+}
+
+async function showAddSpecDialog() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    if (!selectedBrandId) {
+        alert('请先选择一个品牌');
+        return;
+    }
+    const sort = prompt('请输入规格数字：');
+    if (sort && !isNaN(parseInt(sort))) {
+        await openDB();
+        const all = await getAll('specs');
+        const maxId = all.reduce((max, s) => Math.max(max, s.id || 0), 0);
+        const brand = brandsData.find(b => b.id === selectedBrandId);
+        const newSpec = {
+            id: maxId + 1,
+            brand_id: selectedBrandId,
+            name: `${brand.name} ${sort}`,
+            sort_number: parseInt(sort),
+            created_at: Math.floor(Date.now() / 1000),
+            updated_at: Math.floor(Date.now() / 1000)
+        };
+        const tx = db.transaction('specs', 'readwrite');
+        const store = tx.objectStore('specs');
+        await new Promise((resolve, reject) => {
+            const request = store.add(newSpec);
+            request.onsuccess = resolve;
+            request.onerror = reject;
+        });
+        
+        const logData = {
+            type: 'INSERT',
+            table: 'specs',
+            path: `${currentLine} 线 > ${brand.name} > ${newSpec.name}`,
+            data: newSpec
+        };
+        await addLog({
+            operation_type: 'INSERT',
+            table_name: 'specs',
+            data_json: JSON.stringify(logData),
+            created_at: Math.floor(Date.now() / 1000)
+        });
+        
+        specsData = await getAll('specs');
+        renderSpecs();
+    }
+}
 // ==================== 计算更新 ====================
 function updateCalcUI() {
     const active = selectedMaterial || selectedPromoTag;
