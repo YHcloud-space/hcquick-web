@@ -193,18 +193,13 @@ specGrid.addEventListener('click', (e) => {
 });
 
 function enterCalcPage() {
-    const spec = specsData.find(s => s.id === selectedSpecId);
+    const spec = specsData.find(s => s.id === selectedSpecId);  // 只保留这一个
     const brand = brandsData.find(b => b.id === spec?.brand_id);
-    titleEl.textContent = `${currentLine}线 - ${spec?.name || ''}`;
-    backBtn.style.display = 'inline';
-    document.getElementById('nav-icon').style.display = 'none';
-    calcPage.style.display = 'block';
-    renderMaterials();
-  // 规格备注
-    const spec = specsData.find(s => s.id === selectedSpecId);
+    // ...
+    // 规格备注
     if (spec?.remark) {
-    propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格备注: ${spec.remark}</div>`;
-}
+        propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格备注: ${spec.remark}</div>`;
+    }
     updateCalcUI();
 }
 
@@ -289,14 +284,6 @@ function setPeel(mode) { peelMode = mode; updateCalcUI(); }
 function setRoll(n) { rollCount = n; updateCalcUI(); }
 
 function buildPropertyText(m) {
-    switch (m.material_type) {
-        case 'BOTTLE': return `p1: ${m.p1} g`;
-        case 'PUMP_CAP': return `p1: ${m.p1} g | t1: ${m.t1} kg | t2: ${m.t2} kg`;
-        case 'LABEL': case 'PROMO_TAG': {
-            const n = m.q / (m.m - m.c);
-            let text = `m: ${m.m} kg | c: ${m.c} kg | q: ${m.q} EA`;
-            if (m.m > m.c && m.q > 0) text += ` | n: ${n.toFixed(1)} EA/kg`;
-          function buildPropertyText(m) {
     let text;
     switch (m.material_type) {
         case 'BOTTLE': text = `p1: ${m.p1} g`; break;
@@ -308,16 +295,10 @@ function buildPropertyText(m) {
             break;
         default: text = '';
     }
-    // 追加备注
     if (m.remark) {
         text += `<br>备注: ${m.remark}`;
     }
     return text;
-}
-            return text;
-        }
-        default: return '';
-    }
 }
 
 // ==================== 计算逻辑 ====================
