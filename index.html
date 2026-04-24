@@ -1,11 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#F5F5F5">
     <title>HCQuick</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <h1>HCQuick</h1>
-    <p>苹果用户专用页面</p>
+    <div id="app">
+        <!-- 顶部标题栏 -->
+        <div id="top-bar">
+            <span id="nav-icon"></span>
+            <span id="title">HCQuick</span>
+            <span id="menu-btn">⊕</span>
+        </div>
+
+        <!-- 线号切换 -->
+        <div id="line-selector">
+            <button class="line-btn selected" data-line="V">V</button>
+            <button class="line-btn" data-line="C">C</button>
+            <button class="line-btn" data-line="R">R</button>
+        </div>
+
+        <!-- 品牌区域 -->
+        <div class="section">
+            <div class="section-title">品牌</div>
+            <div id="brand-grid" class="grid-container"></div>
+        </div>
+
+        <!-- 规格区域 -->
+        <div class="section">
+            <div class="section-title">规格</div>
+            <div id="spec-grid" class="grid-container"></div>
+        </div>
+
+        <!-- 材料计算区域（后续开发） -->
+        <div id="material-section" style="display:none;"></div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- 注册 Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
+    </script>
 </body>
 </html>
