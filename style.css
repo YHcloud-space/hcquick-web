@@ -178,3 +178,81 @@ body {
     font-size: 12px;
     color: #666;
 }
+/* 促销标签对话框 */
+#promo-dialog-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#promo-dialog {
+    background: #FFFFFF;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 70vh;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+#promo-dialog-title {
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 12px;
+}
+#promo-search {
+    width: 100%;
+    height: 40px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+#promo-grid-container {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+.promo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.promo-tag-btn {
+    height: 50px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    background: #F8F8F8;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.promo-tag-btn.selected {
+    background: #BBDEFB;
+    border-color: #90CAF9;
+    color: #1565C0;
+}
+.promo-tag-btn .order {
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    font-size: 11px;
+    color: #999;
+}
+#promo-dialog-close {
+    width: 100%;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: #F5F5F5;
+    font-size: 14px;
+    cursor: pointer;
+}
