@@ -262,7 +262,90 @@ function calcResult() {
 
 function clearCalc() { inputX.value = ''; resultBox.textContent = '0.0'; }
 
-// ==================== 促销标签（简化版，后续完善） ====================
+// ==================== 促销标签对话框 ====================
+let promoTagUsageMap = {}; // spec_id -> { promo_tag_id: count }
+
 function openPromoDialog() {
-    alert('促销标签选择功能将在下一步完成');
+    const dialog = document.getElementById('promo-dialog-overlay');
+    const searchInput = document.getElementById('promo-search');
+    searchInput.value = '';
+    dialog.style.display = 'flex';
+    renderPromoTags('');
+}
+
+function closePromoDialog() {
+    document.getElementById('promo-dialog-overlay').style.display = 'none';
+}
+
+document.getElementById('promo-search').addEventListener('input', (e) => {
+    renderPromoTags(e.target.value);
+});
+
+document.getElementById('promo-dialog-close').addEventListener('click', closePromoDialog);
+
+// 点击遮罩关闭
+document.getElementById('promo-dialog-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closePromoDialog();
+});
+
+function renderPromoTags(query) {
+    const grid = document.getElementById('promo-grid');
+    const promos = materialsData.filter(m => m.material_type === 'PROMO_TAG');
+
+    // 按使用次数排序
+    const sorted = promos.sort((a, b) => {
+        const countA = promoTagUsageMap[a.id] || 0;
+        const countB = promoTagUsageMap[b.id] || 0;
+        return countB - countA || (b.updated_at || 0) - (a.updated_at || 0);
+    });
+
+    // 过滤
+    const filtered = query 
+        ? sorted.filter(t => (t.m_code || '').includes(query))
+        : sorted;
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">未找到匹配的Code</div>';
+        return;
+    }
+
+    grid.innerHTML = filtered.map((t, i) => {
+        const selected = selectedPromoTag?.id === t.id;
+        const code = t.m_code || '未知';
+        const order = String.fromCodePoint(0x2070 + (i % 10)); // 简易上标
+        return `
+            <button class="promo-tag-btn ${selected ? 'selected' : ''}" data-promo-id="${t.id}">
+                <span class="order">${order}</span>
+                ${code}
+            </button>
+        `;
+    }).join('');
+
+    // 绑定点击
+    grid.querySelectorAll('.promo-tag-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const promo = materialsData.find(m => m.id === parseInt(btn.dataset.promoId));
+            selectPromoTag(promo);
+            closePromoDialog();
+        });
+    });
+}
+
+function selectPromoTag(promo) {
+    selectedPromoTag = promo;
+    selectedMaterial = null;
+    promoTagUsageMap[promo.id] = (promoTagUsageMap[promo.id] || 0) + 1;
+    
+    // 刷新材料按钮状态
+    renderMaterials();
+    
+    // 更新促销标签卡片显示
+    promoCard.textContent = `促销标签: ${promo.m_code || '请选择代码'}`;
+    promoCard.classList.add('active');
+    
+    // 清空输入
+    inputX.value = '';
+    resultBox.textContent = '0.0';
+    
+    updateCalcUI();
 }
