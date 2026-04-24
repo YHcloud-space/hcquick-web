@@ -192,7 +192,7 @@ function updateCalcUI() {
         propertyCard.innerHTML = '';
         return;
     }
-    
+    renderMaterials();
     // 子选项
     if (active.material_type === 'PUMP_CAP') {
         subOptions.innerHTML = `
