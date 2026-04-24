@@ -1,0 +1,91 @@
+/* 全局重置 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #FFFFFF;
+    color: #111111;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* 顶部标题栏 */
+#top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 45px;
+    padding: 0 12px;
+    background: #F5F5F5;
+    font-size: 16px;
+    font-weight: 500;
+}
+#title { flex: 1; text-align: center; }
+#menu-btn { font-size: 20px; cursor: pointer; }
+
+/* 线号切换 */
+#line-selector {
+    display: flex;
+    gap: 8px;
+    padding: 16px 18px;
+}
+.line-btn {
+    flex: 1;
+    height: 40px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    background: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    color: #111111;
+    cursor: pointer;
+}
+.line-btn.selected {
+    background: #E3F2FD;
+    border-color: #90CAF9;
+    color: #1565C0;
+}
+
+/* 区域标题 */
+.section { padding: 12px 18px; }
+.section-title {
+    font-size: 14px;
+    color: #888888;
+    margin-bottom: 8px;
+}
+
+/* 网格容器 */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    min-height: 40px;
+}
+
+/* 按钮 */
+.grid-btn {
+    height: 40px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    background: #FFFFFF;
+    font-size: 14px;
+    color: #111111;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.grid-btn.selected {
+    background: #E3F2FD;
+    border-color: #90CAF9;
+    color: #1565C0;
+}
+
+/* 提示文字 */
+.hint {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #888888;
+    font-size: 14px;
+    padding: 20px 0;
+}
