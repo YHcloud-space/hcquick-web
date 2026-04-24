@@ -10,6 +10,17 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
+   <!-- 促销标签选择对话框 -->
+<div id="promo-dialog-overlay" style="display:none;">
+    <div id="promo-dialog">
+        <div id="promo-dialog-title">选择促销标签</div>
+        <input type="text" id="promo-search" placeholder="输入Code数字检索" inputmode="numeric">
+        <div id="promo-grid-container">
+            <div id="promo-grid" class="promo-grid"></div>
+        </div>
+        <button id="promo-dialog-close">关闭</button>
+    </div>
+</div> 
 <body>
     <div id="app">
                 <!-- 顶部标题栏 -->
