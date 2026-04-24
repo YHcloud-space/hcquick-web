@@ -234,9 +234,11 @@ function renderPromoTags(query) {
         const displayCode = query 
             ? code.replace(new RegExp(`(${query})`, 'gi'), '<span style="color:#FF0000;font-weight:bold;">$1</span>')
             : code;
-        const order = (i + 1).toString().split('').map(d => 
-            String.fromCodePoint(0x2070 + parseInt(d))
-        ).join('');
+        const superscriptMap = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+};
+const order = (i + 1).toString().split('').map(d => superscriptMap[d] || d).join('');
         return `
             <button class="promo-tag-btn ${selected ? 'selected' : ''}" data-promo-id="${t.id}">
                 <span class="order">${order}</span>
