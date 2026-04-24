@@ -21,6 +21,18 @@
         <button id="promo-dialog-close">关闭</button>
     </div>
 </div> 
+    <!-- 同步确认弹窗 -->
+<div id="sync-confirm-overlay" style="display:none;">
+    <div id="sync-confirm-dialog">
+        <div id="sync-confirm-title">⚠️ 强制同步确认</div>
+        <div id="sync-confirm-body">以下本地修改将被服务器数据覆盖：</div>
+        <div id="sync-confirm-list"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+            <button id="sync-confirm-cancel" class="dialog-btn-cancel">取消</button>
+            <button id="sync-confirm-ok" class="dialog-btn-danger">强制更新</button>
+        </div>
+    </div>
+</div>
 <body>
     <div id="app">
                 <!-- 顶部标题栏 -->
