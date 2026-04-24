@@ -283,9 +283,12 @@ function enterCalcPage() {
     titleEl.textContent = `${currentLine}线 - ${spec?.name || ''}`;
     backBtn.style.display = 'inline';
     document.getElementById('nav-icon').style.display = 'none';
+    
+    // 隐藏品牌规格页，显示全屏计算页
+    document.getElementById('brand-spec-page').style.display = 'none';
     calcPage.style.display = 'block';
+    
     renderMaterials();
-    // 规格备注
     if (spec?.remark) {
         propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格备注: ${spec.remark}</div>`;
     }
@@ -293,7 +296,10 @@ function enterCalcPage() {
 }
 
 function backToBrandSpec() {
+    // 隐藏计算页，显示品牌规格页
     calcPage.style.display = 'none';
+    document.getElementById('brand-spec-page').style.display = 'block';
+    
     backBtn.style.display = 'none';
     document.getElementById('nav-icon').style.display = 'inline';
     selectedSpecId = null;
