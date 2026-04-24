@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hcquick-v2';  // ✅ 版本号升级
+const CACHE_NAME = 'hcquick-v3';  // ✅ 版本号升级
 
 const urlsToCache = [
   '/',
