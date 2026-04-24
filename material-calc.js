@@ -269,15 +269,3 @@ function selectPromoTag(promo) {
     
     updateCalcUI();
 }
-
-// ==================== 同步确认弹窗 ====================
-// 注意：showSyncConfirmDialog 已在 brand-spec.js 中定义，此处不重复。
-// 但按钮事件绑定需要确保 DOM 加载后执行，所以放在这里。
-document.getElementById('sync-confirm-cancel').addEventListener('click', () => {
-    document.getElementById('sync-confirm-overlay').style.display = 'none';
-});
-
-document.getElementById('sync-confirm-ok').addEventListener('click', async () => {
-    document.getElementById('sync-confirm-overlay').style.display = 'none';
-    await loadData();
-});
