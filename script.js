@@ -143,13 +143,13 @@ function enterCalcPage() {
     titleEl.textContent = `${currentLine}线 - ${spec?.name || ''}`;
     backBtn.style.display = 'inline';
     document.getElementById('nav-icon').style.display = 'none';
-    calcPage.classList.add('active');
+    calcPage.style.display = 'block';
     renderMaterials();
     updateCalcUI();
 }
 
 function backToBrandSpec() {
-    calcPage.classList.remove('active');
+    calcPage.style.display = 'none';
     backBtn.style.display = 'none';
     document.getElementById('nav-icon').style.display = 'inline';
     selectedSpecId = null;
