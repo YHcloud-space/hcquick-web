@@ -22,6 +22,7 @@ async function loadFromCache() {
       specsData = specs;
       materialsData = materials;
       localVersion = parseInt(version) || 0;
+      renderBrands();
       renderSpecs();
       console.log('从缓存加载成功，版本:', localVersion);
     } else {
@@ -73,6 +74,7 @@ async function loadData() {
     localVersion = json.version || remoteVersion;
     
     // 6. 刷新 UI
+    renderBrands();
     renderSpecs();
     titleEl.textContent = 'HCQuick';
     selectedBrandId = null;
@@ -110,12 +112,7 @@ function renderBrands() {
             renderBrands();
             renderSpecs();
         });
-        bindLongPress(btn, () => {
-            const brand = brandsData.find(b => b.id === parseInt(btn.dataset.brandId));
-            showBrandContextMenu(brand, btn);
-        });
-    });
-}
+        
           
          // 长按事件
         bindLongPress(btn, () => {
