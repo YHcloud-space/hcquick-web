@@ -167,7 +167,7 @@ function renderMenu() {
             <div class="menu-item" onclick="handleSync()">🔄 同步</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
-            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
+            <div class="menu-item" onclick="()">⚙️ 设置</div>
         `;
     } else {
         menu.innerHTML = `
@@ -177,7 +177,7 @@ function renderMenu() {
             <div class="menu-item" onclick="handleSync()">🔄 同步</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
-            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
+            <div class="menu-item" onclick="()">⚙️ 设置</div>
         `;
     }
 }
@@ -369,14 +369,56 @@ async function showAddBrandDialog() {
     }
 }
 
+
 // ==================== 设置对话框 ====================
-function showSettingsDialog() {
+async function showSettingsDialog() {
     menuVisible = false;
     document.getElementById('dropdown-menu').style.display = 'none';
     document.getElementById('settings-data-version').textContent = localVersion || '-';
     document.getElementById('settings-apk-version').textContent = '1.0.3';
+
+    // 默认选中“云盘版”
+    const currentMode = await getMeta('sync_mode') || 'netdisk';
+    const radio = document.querySelector(`input[name="syncMode"][value="${currentMode}"]`);
+    if (radio) radio.checked = true;
+
+    // 读取自定义 URL
+    const baseUrl = await getMeta('custom_base_url') || '';
+    const dataFile = await getMeta('custom_data_file') || '';
+    const versionFile = await getMeta('custom_version_file') || '';
+    document.getElementById('settings-base-url').value = baseUrl;
+    document.getElementById('settings-data-file').value = dataFile;
+    document.getElementById('settings-version-file').value = versionFile;
+    updateUrlPreview();
+
     document.getElementById('settings-overlay').style.display = 'flex';
 }
+
+// 切换同步模式
+async function setSyncMode(mode) {
+    await putMeta('sync_mode', mode);
+}
+
+// 更新 URL 预览
+function updateUrlPreview() {
+    const base = document.getElementById('settings-base-url').value || '';
+    const dataFile = document.getElementById('settings-data-file').value || '';
+    document.getElementById('settings-url-preview').textContent = base + dataFile;
+}
+
+// 输入框内容变更时自动保存到 Metadata
+document.getElementById('settings-base-url').addEventListener('change', async function() {
+    await putMeta('custom_base_url', this.value);
+    updateUrlPreview();
+});
+document.getElementById('settings-data-file').addEventListener('change', async function() {
+    await putMeta('custom_data_file', this.value);
+    updateUrlPreview();
+});
+document.getElementById('settings-version-file').addEventListener('change', async function() {
+    await putMeta('custom_version_file', this.value);
+    updateUrlPreview();
+});
 
 function closeSettingsDialog() {
     document.getElementById('settings-overlay').style.display = 'none';
