@@ -200,6 +200,11 @@ function enterCalcPage() {
     document.getElementById('nav-icon').style.display = 'none';
     calcPage.style.display = 'block';
     renderMaterials();
+  // 规格备注
+    const spec = specsData.find(s => s.id === selectedSpecId);
+    if (spec?.remark) {
+    propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格备注: ${spec.remark}</div>`;
+}
     updateCalcUI();
 }
 
@@ -291,6 +296,24 @@ function buildPropertyText(m) {
             const n = m.q / (m.m - m.c);
             let text = `m: ${m.m} kg | c: ${m.c} kg | q: ${m.q} EA`;
             if (m.m > m.c && m.q > 0) text += ` | n: ${n.toFixed(1)} EA/kg`;
+          function buildPropertyText(m) {
+    let text;
+    switch (m.material_type) {
+        case 'BOTTLE': text = `p1: ${m.p1} g`; break;
+        case 'PUMP_CAP': text = `p1: ${m.p1} g | t1: ${m.t1} kg | t2: ${m.t2} kg`; break;
+        case 'LABEL': case 'PROMO_TAG':
+            const n = m.q / (m.m - m.c);
+            text = `m: ${m.m} kg | c: ${m.c} kg | q: ${m.q} EA`;
+            if (m.m > m.c && m.q > 0) text += ` | n: ${n.toFixed(1)} EA/kg`;
+            break;
+        default: text = '';
+    }
+    // 追加备注
+    if (m.remark) {
+        text += `<br>备注: ${m.remark}`;
+    }
+    return text;
+}
             return text;
         }
         default: return '';
@@ -427,3 +450,34 @@ function selectPromoTag(promo) {
     
     updateCalcUI();
 }
+// ==================== 同步确认弹窗 ====================
+let pendingLogs = []; // 本地修改日志（Web 端暂存）
+
+function showSyncConfirmDialog(logs) {
+    const overlay = document.getElementById('sync-confirm-overlay');
+    const list = document.getElementById('sync-confirm-list');
+    
+    list.innerHTML = logs.slice(0, 10).map(log => {
+        try {
+            const data = JSON.parse(log.data_json);
+            return `<div>• ${data.type}: ${data.path}</div>`;
+        } catch {
+            return `<div>• 未知操作</div>`;
+        }
+    }).join('');
+    
+    if (logs.length > 10) {
+        list.innerHTML += `<div style="color:#888;margin-top:4px;">... 共 ${logs.length} 条修改记录</div>`;
+    }
+    
+    overlay.style.display = 'flex';
+}
+
+document.getElementById('sync-confirm-cancel').addEventListener('click', () => {
+    document.getElementById('sync-confirm-overlay').style.display = 'none';
+});
+
+document.getElementById('sync-confirm-ok').addEventListener('click', async () => {
+    document.getElementById('sync-confirm-overlay').style.display = 'none';
+    await loadData(); // 直接全量覆盖
+});
