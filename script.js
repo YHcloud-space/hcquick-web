@@ -193,9 +193,13 @@ specGrid.addEventListener('click', (e) => {
 });
 
 function enterCalcPage() {
-    const spec = specsData.find(s => s.id === selectedSpecId);  // 只保留这一个
+    const spec = specsData.find(s => s.id === selectedSpecId);
     const brand = brandsData.find(b => b.id === spec?.brand_id);
-    // ...
+    titleEl.textContent = `${currentLine}线 - ${spec?.name || ''}`;
+    backBtn.style.display = 'inline';
+    document.getElementById('nav-icon').style.display = 'none';
+    calcPage.style.display = 'block';
+    renderMaterials();
     // 规格备注
     if (spec?.remark) {
         propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格备注: ${spec.remark}</div>`;
