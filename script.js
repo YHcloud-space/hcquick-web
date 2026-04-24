@@ -264,7 +264,16 @@ function updateCalcUI() {
     } else {
         subOptions.innerHTML = '';
     }
-    
+    // 瓶子累计行
+if (active && active.material_type === 'BOTTLE') {
+    subOptions.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;width:100%;background:#F5F5F5;padding:8px;border-radius:8px;">
+            <span style="font-size:12px;color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bottleAccum.expression || '—'}</span>
+            <button class="sub-btn" onclick="bottleTotal()">Total</button>
+            <span style="background:#FFF0F5;padding:4px 8px;border-radius:8px;font-weight:bold;color:#1565C0;">${bottleAccum.totalEA.toFixed(1)}</span>
+        </div>
+    `;
+}
     // 属性显示
     propertyCard.innerHTML = buildPropertyText(active);
     promoCard.classList.toggle('active', !!selectedPromoTag);
@@ -316,7 +325,16 @@ function calcResult() {
 }
 
 function clearCalc() { inputX.value = ''; resultBox.textContent = '0.0'; }
-
+function bottleTotal() {
+    const x = parseFloat(inputX.value);
+    if (!isNaN(x) && x > 0) {
+        bottleAccum.expression += `${x}kg + `;
+        bottleAccum.totalEA += parseFloat(resultBox.textContent) || 0;
+        inputX.value = '';
+        resultBox.textContent = '0.0';
+        updateCalcUI();
+    }
+}
 // ==================== 促销标签对话框 ====================
 let promoTagUsageMap = {}; // spec_id -> { promo_tag_id: count }
 
@@ -367,13 +385,18 @@ function renderPromoTags(query) {
     grid.innerHTML = filtered.map((t, i) => {
         const selected = selectedPromoTag?.id === t.id;
         const code = t.m_code || '未知';
-        const order = String.fromCodePoint(0x2070 + (i % 10)); // 简易上标
+const displayCode = query 
+    ? code.replace(new RegExp(`(${query})`, 'gi'), '<span style="color:#FF0000;font-weight:bold;">$1</span>')
+    : code;
+        const order = (i + 1).toString().split('').map(d => 
+    String.fromCodePoint(0x2070 + parseInt(d))
+).join('');
         return `
-            <button class="promo-tag-btn ${selected ? 'selected' : ''}" data-promo-id="${t.id}">
-                <span class="order">${order}</span>
-                ${code}
-            </button>
-        `;
+    <button class="promo-tag-btn ${selected ? 'selected' : ''}" data-promo-id="${t.id}">
+        <span class="order">${order}</span>
+        ${displayCode}
+    </button>
+`;
     }).join('');
 
     // 绑定点击
