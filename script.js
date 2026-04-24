@@ -22,7 +22,6 @@ async function loadFromCache() {
       specsData = specs;
       materialsData = materials;
       localVersion = parseInt(version) || 0;
-      renderBrands();
       renderSpecs();
       console.log('从缓存加载成功，版本:', localVersion);
     } else {
@@ -74,7 +73,6 @@ async function loadData() {
     localVersion = json.version || remoteVersion;
     
     // 6. 刷新 UI
-    renderBrands();
     renderSpecs();
     titleEl.textContent = 'HCQuick';
     selectedBrandId = null;
@@ -103,60 +101,23 @@ function renderBrands() {
         </button>
     `).join('');
     
-    // 绑定品牌点击事件
-    brandGrid.querySelectorAll('.grid-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            selectedBrandId = parseInt(btn.dataset.brandId);
-            function renderBrands() {
-    const filtered = brandsData.filter(b => b.line_code === currentLine);
-    if (filtered.length === 0) {
-        brandGrid.innerHTML = '<span class="hint">暂无品牌</span>';
-        return;
-    }
-    brandGrid.innerHTML = filtered.map(b => `
-        <button class="grid-btn ${b.id === selectedBrandId ? 'selected' : ''}"
-                data-brand-id="${b.id}">
-            ${b.name}
-        </button>
-    `).join('');
+   
     
-    // 绑定点击事件
+        // 绑定品牌点击事件和长按
     brandGrid.querySelectorAll('.grid-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             selectedBrandId = parseInt(btn.dataset.brandId);
             renderBrands();
             renderSpecs();
         });
-        // 长按事件
         bindLongPress(btn, () => {
             const brand = brandsData.find(b => b.id === parseInt(btn.dataset.brandId));
             showBrandContextMenu(brand, btn);
         });
     });
 }
-            function renderSpecs() {
-    if (!selectedBrandId) {
-        specGrid.innerHTML = '<span class="hint">请先选择一个品牌</span>';
-        return;
-    }
-    const filtered = specsData.filter(s => s.brand_id === selectedBrandId);
-    if (filtered.length === 0) {
-        specGrid.innerHTML = '<span class="hint">暂无规格</span>';
-        return;
-    }
-    specGrid.innerHTML = filtered.map(s => `
-        <button class="grid-btn ${s.id === selectedSpecId ? 'selected' : ''}"
-                data-spec-id="${s.id}">
-            ${s.name}
-        </button>
-    `).join('');
-    
-    specGrid.querySelectorAll('.grid-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            selectedSpecId = parseInt(btn.dataset.specId);
-            enterCalcPage();
-        });
-        // 长按事件
+          
+         // 长按事件
         bindLongPress(btn, () => {
             const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
             showSpecContextMenu(spec, btn);
@@ -183,16 +144,20 @@ function renderSpecs() {
         </button>
     `).join('');
     
-    // 绑定规格点击事件
+    // 绑定规格点击事件和长按
     specGrid.querySelectorAll('.grid-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             selectedSpecId = parseInt(btn.dataset.specId);
-            renderSpecs();
-            // 后续：进入材料计算页面
+            enterCalcPage();
+        });
+        bindLongPress(btn, () => {
+            const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
+            showSpecContextMenu(spec, btn);
         });
     });
 }
-
+    
+    
 // ==================== 线号切换 ====================
 lineBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -445,19 +410,8 @@ function closeSettingsDialog() {
 }
 
 // ==================== 增加品牌/规格对话框（简化版） ====================
-function showAddBrandDialog() {
-    menuVisible = false;
-    document.getElementById('dropdown-menu').style.display = 'none';
-    const name = prompt('请输入新品牌名称（1-15字符）：');
-    // 后续加入 IndexedDB 写入逻辑
-}
 
-function showAddSpecDialog() {
-    menuVisible = false;
-    document.getElementById('dropdown-menu').style.display = 'none';
-    const name = prompt('请输入新规格名称：');
-    // 后续加入 IndexedDB 写入逻辑
-}
+
 
 // ==================== 日志对话框 ====================
 function showLogDialog() {
