@@ -90,10 +90,10 @@ body {
     padding: 20px 0;
 }
 
-/* 材料计算页面 - 全屏覆盖 */
+/* 材料计算页面 - 填充在品牌页面之上 */
 #calc-page {
-    position: fixed;
-    top: 45px;          /* 标题栏高度 */
+    position: absolute;
+    top: 45px;
     left: 0;
     right: 0;
     bottom: 0;
