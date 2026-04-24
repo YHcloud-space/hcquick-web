@@ -89,14 +89,32 @@ body {
     font-size: 14px;
     padding: 20px 0;
 }
-/* 材料计算页面 */
-#calc-page { display: none; padding: 12px 16px; }
+
+/* 材料计算页面 - 全屏覆盖 */
+#calc-page {
+    position: fixed;
+    top: 45px;          /* 标题栏高度 */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #FFFFFF;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+    padding: 12px 16px;
+}
+/* 品牌/规格页面容器 */
+#brand-spec-page { display: block; }
 #calc-page.active { display: block; }
 #brand-spec-page.active { display: block; }
 
 /* 返回按钮 */
 #back-btn { font-size: 20px; cursor: pointer; }
-
+/* 确保标题栏在计算页上方 */
+#top-bar {
+    position: relative;
+    z-index: 200;
+}
 /* 输入行 */
 #input-row {
     display: flex;
