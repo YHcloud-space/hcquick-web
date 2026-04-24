@@ -42,6 +42,43 @@
             <span id="title">HCQuick</span>
             <span id="menu-btn">⊕</span>
         </div>
+                <!-- 下拉菜单 -->
+        <div id="dropdown-menu" style="display:none;">
+            <div class="menu-item" onclick="showAddBrandDialog()">+ 增加品牌</div>
+            <div class="menu-item" onclick="showAddSpecDialog()">+ 增加规格</div>
+            <div class="divider"></div>
+            <div class="menu-item" onclick="handleSync()">
+                🔄 同步
+                <span id="menu-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;padding:2px 6px;font-size:10px;margin-left:8px;">1</span>
+            </div>
+            <div class="divider"></div>
+            <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
+            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
+        </div>
+    </div>
+
+    <!-- 设置对话框 -->
+    <div id="settings-overlay" style="display:none;">
+        <div id="settings-dialog">
+            <div id="settings-title">设置</div>
+            <div id="settings-content">
+                <div style="display:flex;justify-content:space-around;margin-bottom:12px;">
+                    <label><input type="radio" name="syncMode" value="standalone" onchange="setSyncMode('standalone')"> 单机版</label>
+                    <label><input type="radio" name="syncMode" value="netdisk" onchange="setSyncMode('netdisk')"> 云盘版</label>
+                </div>
+                <div class="divider"></div>
+                <div style="display:flex;gap:8px;margin:12px 0;">
+                    <button onclick="importJson()" style="flex:1;height:36px;background:#4CAF50;color:#fff;border:none;border-radius:8px;">📁 导入</button>
+                    <button onclick="exportJson()" style="flex:1;height:36px;background:#2196F3;color:#fff;border:none;border-radius:8px;">📤 导出</button>
+                </div>
+                <div style="font-size:12px;color:#888;margin:8px 0;">Data版本: <span id="settings-data-version">-</span></div>
+                <div style="font-size:12px;color:#888;margin:8px 0;">APK版本: <span id="settings-apk-version">-</span></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button onclick="closeSettingsDialog()" style="flex:1;height:36px;border:1px solid #E5E5E5;border-radius:8px;background:#fff;">取消</button>
+            </div>
+        </div>
+    </div>
 
         <!-- 线号切换 -->
         <div id="line-selector">
