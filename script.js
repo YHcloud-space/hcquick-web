@@ -155,10 +155,95 @@ lineBtns.forEach(btn => {
     });
 });
 
-// ==================== 菜单按钮（同步） ====================
-menuBtn.addEventListener('click', () => {
-    loadData();
+// ==================== 菜单功能 ====================
+let menuVisible = false;
+
+menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuVisible = !menuVisible;
+    document.getElementById('dropdown-menu').style.display = menuVisible ? 'block' : 'none';
 });
+
+document.addEventListener('click', () => {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+});
+
+function handleSync() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    loadData();
+}
+
+// ==================== 设置对话框 ====================
+function showSettingsDialog() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('settings-data-version').textContent = localVersion || '-';
+    document.getElementById('settings-apk-version').textContent = '1.0.3';
+    document.getElementById('settings-overlay').style.display = 'flex';
+}
+
+function closeSettingsDialog() {
+    document.getElementById('settings-overlay').style.display = 'none';
+}
+
+// ==================== 增加品牌/规格对话框（简化版） ====================
+function showAddBrandDialog() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    const name = prompt('请输入新品牌名称（1-15字符）：');
+    // 后续加入 IndexedDB 写入逻辑
+}
+
+function showAddSpecDialog() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    const name = prompt('请输入新规格名称：');
+    // 后续加入 IndexedDB 写入逻辑
+}
+
+// ==================== 日志对话框 ====================
+function showLogDialog() {
+    menuVisible = false;
+    document.getElementById('dropdown-menu').style.display = 'none';
+    alert('本地修改日志功能将在后续版本完善');
+}
+
+// ==================== 导入导出 ====================
+function importJson() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        const text = await file.text();
+        const json = JSON.parse(text);
+        await openDB();
+        await clearAndPutAll('brands', json.brands || []);
+        await clearAndPutAll('specs', json.specs || []);
+        await clearAndPutAll('materials', json.material_config || []);
+        await putMeta('local_version', String(json.version || 0));
+        location.reload();
+    };
+    input.click();
+}
+
+function exportJson() {
+    const json = {
+        version: localVersion,
+        brands: brandsData,
+        specs: specsData,
+        material_config: materialsData
+    };
+    const blob = new Blob([JSON.stringify(json, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hcquick_backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 // ==================== 启动 ====================
 (async () => {
