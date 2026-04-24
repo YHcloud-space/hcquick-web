@@ -9,7 +9,29 @@ let specsData = [];
 let materialsData = [];
 let promoTagsData = [];
 let localVersion = 0;
-
+// ==================== 从 IndexedDB 加载缓存数据 ====================
+async function loadFromCache() {
+  try {
+    await openDB();
+    const brands = await getAll('brands');
+    const specs = await getAll('specs');
+    const materials = await getAll('materials');
+    const version = await getMeta('local_version');
+    if (brands.length > 0) {
+      brandsData = brands;
+      specsData = specs;
+      materialsData = materials;
+      localVersion = parseInt(version) || 0;
+      renderBrands();
+      renderSpecs();
+      console.log('从缓存加载成功，版本:', localVersion);
+    } else {
+      console.log('缓存为空，等待首次同步');
+    }
+  } catch (e) {
+    console.error('缓存加载失败:', e);
+  }
+}
 // ==================== DOM 元素 ====================
 const titleEl = document.getElementById('title');
 const brandGrid = document.getElementById('brand-grid');
@@ -17,26 +39,54 @@ const specGrid = document.getElementById('spec-grid');
 const lineBtns = document.querySelectorAll('.line-btn');
 const menuBtn = document.getElementById('menu-btn');
 
-// ==================== 数据加载 ====================
+// ==================== 数据同步（带版本检查） ====================
 async function loadData() {
-    try {
-        const resp = await fetch('https://data.cloudgj.cn/hcquick_data.json');
-        if (!resp.ok) throw new Error('网络错误');
-        const json = await resp.json();
-        brandsData = json.brands || [];
-        specsData = json.specs || [];
-        materialsData = json.material_config || [];
-        localVersion = json.version || 0;
-        renderBrands();
-        renderSpecs();
-        titleEl.textContent = 'HCQuick';
-        selectedBrandId = null;
-        selectedSpecId = null;
-    } catch (e) {
-        brandGrid.innerHTML = '<span class="hint">数据加载失败，请检查网络</span>';
-        specGrid.innerHTML = '';
-        console.error('数据加载失败:', e);
+  try {
+    // 1. 检查远程版本
+    const verResp = await fetch('https://data.cloudgj.cn/version.txt');
+    if (!verResp.ok) throw new Error('版本检查失败');
+    const remoteVersion = parseInt((await verResp.text()).trim());
+    
+    // 2. 如果远程版本不大于本地版本，跳过下载
+    if (remoteVersion <= localVersion && brandsData.length > 0) {
+      console.log('已经是最新版本:', localVersion);
+      return;
     }
+    
+    console.log(`发现新版本: ${remoteVersion} (本地: ${localVersion})`);
+    
+    // 3. 下载完整 JSON
+    const dataResp = await fetch('https://data.cloudgj.cn/hcquick_data.json');
+    if (!dataResp.ok) throw new Error('数据下载失败');
+    const json = await dataResp.json();
+    
+    // 4. 写入 IndexedDB（全量覆盖）
+    await openDB();
+    await clearAndPutAll('brands', json.brands || []);
+    await clearAndPutAll('specs', json.specs || []);
+    await clearAndPutAll('materials', json.material_config || []);
+    await putMeta('local_version', String(json.version || remoteVersion));
+    
+    // 5. 更新内存数据
+    brandsData = json.brands || [];
+    specsData = json.specs || [];
+    materialsData = json.material_config || [];
+    localVersion = json.version || remoteVersion;
+    
+    // 6. 刷新 UI
+    renderBrands();
+    renderSpecs();
+    titleEl.textContent = 'HCQuick';
+    selectedBrandId = null;
+    selectedSpecId = null;
+    
+    console.log('同步完成，版本:', localVersion);
+  } catch (e) {
+    console.error('同步失败:', e);
+    if (brandsData.length === 0) {
+      brandGrid.innerHTML = '<span class="hint">数据加载失败，请检查网络</span>';
+    }
+  }
 }
 
 // ==================== 品牌渲染 ====================
@@ -111,7 +161,12 @@ menuBtn.addEventListener('click', () => {
 });
 
 // ==================== 启动 ====================
-loadData();
+(async () => {
+  await loadFromCache();
+  if (localVersion > 0) {
+    loadData().catch(() => {});
+  }
+})();
 // ==================== 材料计算 ====================
 const backBtn = document.getElementById('back-btn');
 const calcPage = document.getElementById('calc-page');
