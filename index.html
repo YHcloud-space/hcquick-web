@@ -63,17 +63,25 @@
             <div id="settings-title">设置</div>
             <div id="settings-content">
                 <div style="display:flex;justify-content:space-around;margin-bottom:12px;">
-                    <label><input type="radio" name="syncMode" value="standalone" onchange="setSyncMode('standalone')"> 单机版</label>
-                    <label><input type="radio" name="syncMode" value="netdisk" onchange="setSyncMode('netdisk')"> 云盘版</label>
+                    <label><input type="radio" name="syncMode" value="standalone" id="radio-standalone" onchange="setSyncMode('standalone')"> 单机版</label>
+<label><input type="radio" name="syncMode" value="netdisk" id="radio-netdisk" onchange="setSyncMode('netdisk')"> 云盘版</label>
                 </div>
                 <div class="divider"></div>
                 <div style="display:flex;gap:8px;margin:12px 0;">
                     <button onclick="importJson()" style="flex:1;height:36px;background:#4CAF50;color:#fff;border:none;border-radius:8px;">📁 导入</button>
                     <button onclick="exportJson()" style="flex:1;height:36px;background:#2196F3;color:#fff;border:none;border-radius:8px;">📤 导出</button>
                 </div>
+                <div style="margin-top:8px;">
+  <div style="font-size:13px;font-weight:500;margin-bottom:2px;">自定义服务器地址（云盘版）</div>
+  <input type="text" id="settings-base-url" placeholder="基础 URL" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
+  <input type="text" id="settings-data-file" placeholder="数据文件名" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
+  <input type="text" id="settings-version-file" placeholder="版本文件名" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
+  <div style="font-size:10px;color:#888;margin-top:4px;">完整数据 URL 预览: <span id="settings-url-preview">-</span></div>
+</div>
                 <div style="font-size:12px;color:#888;margin:8px 0;">Data版本: <span id="settings-data-version">-</span></div>
                 <div style="font-size:12px;color:#888;margin:8px 0;">APK版本: <span id="settings-apk-version">-</span></div>
             </div>
+            
             <div style="display:flex;gap:8px;margin-top:12px;">
                 <button onclick="closeSettingsDialog()" style="flex:1;height:36px;border:1px solid #E5E5E5;border-radius:8px;background:#fff;">取消</button>
             </div>
