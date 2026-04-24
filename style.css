@@ -122,6 +122,11 @@ body {
     gap: 8px;
     margin-bottom: 12px;
 }
+#input-row > span {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
 #input-x {
     flex: 1;
     height: 50px;
