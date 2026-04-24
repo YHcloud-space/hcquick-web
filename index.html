@@ -12,9 +12,10 @@
 </head>
 <body>
     <div id="app">
-        <!-- 顶部标题栏 -->
+                <!-- 顶部标题栏 -->
         <div id="top-bar">
             <span id="nav-icon"></span>
+            <span id="back-btn" style="display:none;" onclick="backToBrandSpec()">←</span>
             <span id="title">HCQuick</span>
             <span id="menu-btn">⊕</span>
         </div>
@@ -38,9 +39,18 @@
             <div id="spec-grid" class="grid-container"></div>
         </div>
 
-        <!-- 材料计算区域（后续开发） -->
-        <div id="material-section" style="display:none;"></div>
-    </div>
+                <!-- 材料计算页面 -->
+        <div id="calc-page">
+            <div id="input-row">
+                <input type="text" id="input-x" placeholder="X (kg)" inputmode="decimal">
+                <span>=</span>
+                <div id="result-box" onclick="clearCalc()">0.0</div>
+            </div>
+            <div id="material-grid" class="grid-container"></div>
+            <div id="promo-card" onclick="openPromoDialog()">促销标签: 请选择代码</div>
+            <div id="sub-options"></div>
+            <div id="property-card"></div>
+        </div>
 
     <script src="script.js"></script>
 
