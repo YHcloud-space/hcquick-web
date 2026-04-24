@@ -89,3 +89,92 @@ body {
     font-size: 14px;
     padding: 20px 0;
 }
+/* 材料计算页面 */
+#calc-page { display: none; padding: 12px 16px; }
+#calc-page.active { display: block; }
+#brand-spec-page.active { display: block; }
+
+/* 返回按钮 */
+#back-btn { font-size: 20px; cursor: pointer; }
+
+/* 输入行 */
+#input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+#input-x {
+    flex: 1;
+    height: 50px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+}
+#result-box {
+    flex: 1;
+    height: 50px;
+    background: #FFF0F5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* 材料网格 */
+#material-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+/* 促销标签卡片 */
+#promo-card {
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+#promo-card.active {
+    background: #E3F2FD;
+    border-color: #64B5F6;
+    color: #1565C0;
+}
+
+/* 子选项 */
+#sub-options {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.sub-btn {
+    padding: 6px 16px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    background: #FFFFFF;
+    font-size: 12px;
+    cursor: pointer;
+}
+.sub-btn.selected {
+    background: #E3F2FD;
+    border-color: #90CAF9;
+    color: #1565C0;
+}
+
+/* 属性卡片 */
+#property-card {
+    background: #F5F5F5;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 12px;
+    color: #666;
+}
