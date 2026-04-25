@@ -89,6 +89,8 @@ function renderMaterials() {
         btn.addEventListener('click', () => {
             selectedMaterial = materialsData.find(m => m.id === parseInt(btn.dataset.matId));
             selectedPromoTag = null;
+            resultBox.textContent = '0.0';   // ← 新增此行，清空结果区
+            inputX.value = '';               // ← 确认输入框也被清空
             updateCalcUI();
             inputX.focus();
         });
@@ -164,8 +166,25 @@ function buildPropertyText(m) {
 inputX.addEventListener('input', calcResult);
 
 function calcResult() {
+    // [新增] 全局过滤：限制只能输入最多7位数字（含小数点）
+    let rawValue = inputX.value;
+    // 只允许数字和小数点，且最多1个小数点
+    let filtered = rawValue.replace(/[^0-9.]/g, '');
+    const dotIndex = filtered.indexOf('.');
+    if (dotIndex !== -1) {
+        filtered = filtered.substring(0, dotIndex + 1) + filtered.substring(dotIndex + 1).replace(/\./g, '');
+    }
+    // 截断到7位
+    if (filtered.length > 7) {
+        filtered = filtered.substring(0, 7);
+    }
+    // 如果过滤后与原始值不同，则更新输入框并重新获取值
+    if (filtered !== rawValue) {
+        inputX.value = filtered;
+    }
     const active = selectedMaterial || selectedPromoTag;
     const x = parseFloat(inputX.value);
+    
     if (!active || isNaN(x) || x <= 0) { resultBox.textContent = '0.0'; return; }
     
     let result;
