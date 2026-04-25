@@ -59,10 +59,13 @@
         <!-- ==================== 材料计算页面 ==================== -->
         <div id="calc-page" style="display:none;">
             <div id="input-row">
-                <input type="text" id="input-x" placeholder="X (kg)" inputmode="decimal">
-                <span>=</span>
-                <div id="result-box" onclick="clearCalc()">0.0</div>
-            </div>
+    <div class="x-input-area">
+        <span>X (kg) =</span>
+        <input type="text" id="input-x" value="0.0" inputmode="decimal">
+    </div>
+    <div class="equal-sign">=</div>
+    <div id="result-box">4.608 kg</div>
+</div>
             <div id="material-grid" class="grid-container"></div>
             <div id="promo-card" onclick="openPromoDialog()">促销标签: 请选择代码</div>
             <div id="sub-options"></div>
