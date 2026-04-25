@@ -342,7 +342,7 @@ body {
     max-width: 420px;
     background: #E6F0FA;
     border-radius: 16px;
-    height: 55vh;          /* 给对话框一个明确的高度，而不是 max-height */
+    height: 35vh;          /* 给对话框一个明确的高度，而不是 max-height */
     max-height: 60vh;
     display: flex;
     flex-direction: column;
@@ -354,7 +354,7 @@ body {
     border: none;
     border-radius: 8px;
     flex-shrink: 0;        /* 禁止被压缩或拉伸 */
-    height: 56px;
+    height: 35px;
     font-size: 16px;
     font-weight: 400;
     cursor: pointer;
