@@ -231,7 +231,7 @@ body {
     position: absolute;
     top: -10px;
     right: 10px;
-    background: #FFFFFF;          /* 白色背景，与页面底色一致，形成"镂空"效果 */
+    background: #FFF0F5;           /* 白色背景，与页面底色一致，形成"镂空"效果 */
     color: #757575;
     font-size: 12px;
     font-weight: 400;
