@@ -135,11 +135,10 @@ position: relative;  /* 新增 */
     z-index: 200;
 }
 /* 输入行 */
-#input-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
+#input-row > span {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
 }
 #input-row > span {
     width: 20px;
@@ -188,11 +187,17 @@ position: relative;  /* 新增 */
     font-size: 16px;
     cursor: pointer;
     margin-bottom: 12px;
+    background: #FAFAFA;           /* 新增浅灰背景 */
+    display: flex;                 /* 新增 */
+    align-items: center;           /* 新增：垂直居中 */
+    justify-content: center;       /* 新增：水平居中 */
+    min-height: 48px;              /* 新增：最小高度 */
 }
+
 #promo-card.active {
-    background: #E3F2FD;
+    background: #BBDEFB;           /* 选中时浅蓝 */
     border-color: #64B5F6;
-    color: #1565C0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 /* 子选项 */
@@ -233,17 +238,24 @@ position: relative;  /* 新增 */
     display: flex;
     align-items: center;
     justify-content: center;
+    align-items: flex-start;         /* 靠上显示，键盘弹出时不会遮挡关闭按钮 */
+    padding-top: 10vh;               /* 顶部留一些空间 */
 }
 #promo-dialog {
-    background: #FAFAFA;                          /* 对话框底色 */
+    background: #FFFFFF;
     border-radius: 12px;
     width: 90%;
     max-width: 400px;
-    max-height: 75vh;                             /* 稍微加高 */
+    max-height: 60vh;                /* 限制最高 60% 屏幕 */
     padding: 16px;
     display: flex;
     flex-direction: column;
-    border: 1px solid #E0E0E0;                    /* 外框区分 */
+}
+#promo-dialog-close {
+    position: sticky;                /* 固定在底部 */
+    bottom: 0;
+    background: #F5F5F5;
+    margin-top: auto;                /* 推到对话框底部 */
 }
 #promo-dialog-title {
     font-size: 16px;
