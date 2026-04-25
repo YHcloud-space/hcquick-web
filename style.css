@@ -342,27 +342,26 @@ body {
     max-width: 420px;
     background: #E6F0FA;
     border-radius: 16px;
-    height: 40vh;          /* 给对话框一个明确的高度，而不是 max-height */
+    max-height: 40vh;          /* 天花板限制，而非强制固定 */
     display: flex;
     flex-direction: column;
     padding: 16px;
     box-sizing: border-box;
 }
+/* 关闭按钮 */
 #promo-dialog-close {
     background: #FFFFFF;
     border: none;
     border-radius: 8px;
-    height: 15px;            /* 固定高度 */
-    min-height: 56px;        /* 禁止缩小 */
-    max-height: 56px;        /* 禁止放大 */
-    flex-shrink: 0;          /* 禁止弹性伸缩 */
+    height: 40px;              /* 调小关闭按钮，与搜索框一致 */
+    flex-shrink: 0;            /* 禁止被压缩 */
     font-size: 16px;
     font-weight: 400;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: auto;        /* 仍然推到底部 */
+    margin-top: auto;
 }
 #promo-dialog-title {
     font-size: 16px;
@@ -371,12 +370,11 @@ body {
     margin-bottom: 12px;
     color: #333;
 }
+/* 搜索输入框 */
 #promo-search {
     width: 100%;
-    height: 15px;            /* 高度固定 */
-    min-height: 56px;        /* 禁止缩小 */
-    max-height: 56px;        /* 禁止放大 */
-    flex-shrink: 0;          /* 禁止弹性伸缩 */
+    height: 35px;              /* 调小搜索框 */
+    flex-shrink: 0;            /* 禁止被压缩 */
     border: 1px solid #E5E5E5;
     border-radius: 8px;
     text-align: center;
@@ -387,11 +385,11 @@ body {
 #promo-grid-container {
     background: #FFFFFF;
     border-radius: 12px;
-    flex: 1;               /* 占据剩下的所有空间 */
+    flex: 1;                   /* 占据剩余空间 */
     overflow-y: auto;
     padding: 8px;
     margin-bottom: 8px;
-    min-height: 0;         /* 关键！允许它在 flex 容器内正确缩小 */
+    min-height: 0;             /* 关键！允许被正确压缩 */
 }
 .promo-grid {
     display: grid;
