@@ -117,9 +117,10 @@
                     <input type="text" id="settings-version-file" placeholder="版本文件名" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
                     <div style="font-size:10px;color:#888;margin-top:4px;">完整数据 URL 预览: <span id="settings-url-preview">-</span></div>
                 </div>
-                <div style="font-size:12px;color:#888;margin:8px 0;">Data版本: <span id="settings-data-version">-</span></div>
-                <div style="font-size:12px;color:#888;margin:8px 0;">APK版本: <span id="settings-apk-version">-</span></div>
-            </div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin:8px 0;">
+    <span>Data版本: <span id="settings-data-version">-</span></span>
+    <span>APK版本: <span id="settings-apk-version">-</span></span>
+</div>
             <div style="display:flex;gap:8px;margin-top:12px;">
                 <button onclick="closeSettingsDialog()" style="flex:1;height:36px;border:1px solid #E5E5E5;border-radius:8px;background:#fff;">取消</button>
                 <button onclick="saveAndRestart()" style="flex:1;height:36px;border:none;border-radius:8px;background:#4CAF50;color:#fff;font-size:14px;">保存并重启</button>
