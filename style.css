@@ -139,29 +139,55 @@ body {
 }
 /* 输入行 */
 
-#input-row > span {
-    width: 20px;
-    text-align: center;
-    flex-shrink: 0;
-    line-height: 50px;
-    font-size: 20px;
+/* 将输入行改为 Grid 布局，强制同行且等号居中 */
+#input-row {
+    display: grid;
+    grid-template-columns: 5fr 2fr 5fr;  /* 左右各5/12，等号2/12=1/6 */
+    align-items: center;
+    gap: 8px;               /* 可选，增加间距 */
+    margin-bottom: 16px;
+}
+
+/* 左侧输入区：包含文字和输入框 */
+.x-input-area {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 50px;
+}
+.x-input-area span {
+    font-size: 14px;
+    color: #666;
 }
 #input-x {
     flex: 1;
-    height: 50px;
-    border: 1px solid #E5E5E5;
-    border-radius: 8px;
-    text-align: center;
+    border: none;
+    text-align: right;
     font-size: 18px;
+    outline: none;
+    height: auto;           /* 由父容器高度决定 */
 }
+
+/* 等号居中 */
+.equal-sign {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* 右侧结果区 */
 #result-box {
-    flex: 1;
-    height: 50px;
     background: #FFF0F5;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 50px;
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
