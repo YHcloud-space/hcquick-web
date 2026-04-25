@@ -302,8 +302,7 @@ function renderPromoTags(query) {
         });
     });
 }
-
-function selectPromoTag(promo) {
+    function selectPromoTag(promo) {
     selectedPromoTag = promo;
     selectedMaterial = null;
     promoTagUsageMap[promo.id] = (promoTagUsageMap[promo.id] || 0) + 1;
@@ -319,7 +318,6 @@ function selectPromoTag(promo) {
     updateCalcUI();
 }
 
-// 全局委托：点击规格按钮进入计算页面
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('grid-btn') && e.target.dataset.specId) {
         selectedSpecId = parseInt(e.target.dataset.specId);
