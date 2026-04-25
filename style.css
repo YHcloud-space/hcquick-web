@@ -338,28 +338,29 @@ body {
     
 }
 #promo-dialog {
-    width: 90%;                /* 新增：相对父容器宽度 */
-    max-width: 400px;         /* 新增：限制最大宽度 */
+    width: 94%;
+    max-width: 420px;
     background: #E6F0FA;
     border-radius: 16px;
-    max-height: 45vh;
+    height: 55vh;          /* 给对话框一个明确的高度，而不是 max-height */
+    max-height: 60vh;
     display: flex;
     flex-direction: column;
     padding: 16px;
+    box-sizing: border-box;
 }
 #promo-dialog-close {
     background: #FFFFFF;
     border: none;
     border-radius: 8px;
-    height: 60px;
-    font-size: 18px;
+    flex-shrink: 0;        /* 禁止被压缩或拉伸 */
+    height: 56px;
+    font-size: 16px;
     font-weight: 400;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    
-    margin-top: auto;   /* 推到底部 */
 }
 #promo-dialog-title {
     font-size: 16px;
@@ -370,21 +371,23 @@ body {
 }
 #promo-search {
     width: 100%;
-    height: 60px;                                  /* 加高 */
+    flex-shrink: 0;        /* 禁止被压缩或拉伸 */
+    height: 56px;
     border: 1px solid #E5E5E5;
     border-radius: 8px;
     text-align: center;
     font-size: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     background: #FFFFFF;
 }
 #promo-grid-container {
-    background: #FFFFFF;        /* 内部滚动区白色 */
+    background: #FFFFFF;
     border-radius: 12px;
-    flex: 1;
+    flex: 1;               /* 占据剩下的所有空间 */
     overflow-y: auto;
     padding: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    min-height: 0;         /* 关键！允许它在 flex 容器内正确缩小 */
 }
 .promo-grid {
     display: grid;
