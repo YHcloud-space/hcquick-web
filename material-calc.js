@@ -282,10 +282,10 @@ function renderPromoTags(query) {
             ? code.replace(new RegExp(`(${query})`, 'gi'), '<span style="color:#FF0000;font-weight:bold;">$1</span>')
             : code;
         const superscriptMap = {
-    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
-};
-const order = (i + 1).toString().split('').map(d => superscriptMap[d] || d).join('');
+            '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+            '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+        };
+        const order = (i + 1).toString().split('').map(d => superscriptMap[d] || d).join('');
         return `
             <button class="promo-tag-btn ${selected ? 'selected' : ''}" data-promo-id="${t.id}">
                 <span class="order">${order}</span>
@@ -301,7 +301,7 @@ const order = (i + 1).toString().split('').map(d => superscriptMap[d] || d).join
             closePromoDialog();
         });
     });
-}
+} // ← 确保这个花括号是 `renderPromoTags` 函数的闭合
 function selectPromoTag(promo) {
     selectedPromoTag = promo;
     selectedMaterial = null;
@@ -317,7 +317,6 @@ function selectPromoTag(promo) {
     
     updateCalcUI();
 }
-
 // 全局委托：点击规格按钮进入计算页面
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('grid-btn') && e.target.dataset.specId) {
