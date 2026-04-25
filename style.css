@@ -126,6 +126,8 @@ body {
     width: 20px;
     text-align: center;
     flex-shrink: 0;
+    line-height: 50px;
+    font-size: 20px;
 }
 #input-x {
     flex: 1;
@@ -394,5 +396,27 @@ body {
     padding: 10px 16px;
     font-size: 14px;
     cursor: pointer;
+}
+/* 禁止浏览器默认长按菜单 */
+.grid-btn,
+.promo-tag-btn,
+.sub-btn,
+#promo-card,
+.line-btn,
+#menu-btn,
+#result-box,
+.menu-item,
+.context-item {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* 输入框正常可选中 */
+#input-x,
+#promo-search,
+input[type="text"] {
+    -webkit-user-select: text;
+    user-select: text;
 }
 .context-item:hover { background: #F5F5F5; }
