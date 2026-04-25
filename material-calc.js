@@ -19,13 +19,7 @@ let rollCount = 1;
 let peelMode = 'NONE';
 let bottleAccum = { expression: '', totalEA: 0 };
 
-// ==================== 规格点击 → 进入计算页面 ====================
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('grid-btn') && e.target.dataset.specId) {
-        selectedSpecId = parseInt(e.target.dataset.specId);
-        enterCalcPage();
-    }
-});
+
 
 function enterCalcPage() {
     isInCalcPage = true;
