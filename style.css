@@ -363,7 +363,7 @@ body {
     gap: 10px;                                     /* 增加间距 */
 }
 .promo-tag-btn {
-    height: 42px;                                  /* 降低按钮高度 */
+    height: 30px;                                  /* 降低按钮高度 */
     border: 1px solid #E5E5E5;
     border-radius: 8px;
     background: #F8F8F8;
@@ -385,7 +385,7 @@ body {
     position: absolute;
     top: 2px;
     left: 6px;
-    font-size: 12px;                               /* 加大角标 */
+    font-size: 14px;                               /* 加大角标 */
     color: #999;
     font-weight: 500;
 }
