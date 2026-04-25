@@ -21,6 +21,20 @@ body {
 }
 #title { flex: 1; text-align: center; }
 #menu-btn { font-size: 20px; cursor: pointer; }
+position: relative;  /* 新增 */
+#menu-badge {
+    position: absolute;   /* 新增 */
+    top: 2px;            /* 新增 */
+    right: 2px;          /* 新增 */
+    background: #E53935;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 10px;
+    min-width: 16px;
+    text-align: center;
+    display: none;       /* 默认隐藏，JS 控制显隐 */
+}
 
 /* 线号切换 */
 #line-selector {
