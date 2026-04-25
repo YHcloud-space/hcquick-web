@@ -261,7 +261,7 @@ body {
     position: absolute;
     top: -10px;
     right: 10px;
-    background: #FFF0F5;
+    background: #FFFFFF;
     color: #757575;
     font-size: 12px;
     font-weight: 400;
@@ -351,8 +351,8 @@ body {
     background: #FFFFFF;
     border: none;
     border-radius: 8px;
-    height: 60px;               /* 大点击区域 */
-    font-size: 16px;
+    height: 60px;
+    font-size: 18px;
     font-weight: 400;
     cursor: pointer;
     display: flex;
