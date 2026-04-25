@@ -287,11 +287,11 @@ function renderPromoTags(query) {
         };
         const order = (i + 1).toString().split('').map(d => superscriptMap[d] || d).join('');
         return `
-            <button class="promo-tag-btn ${selected ? 'selected' : ''}" data-promo-id="${t.id}">
-                <span class="order">${order}</span>
-                ${displayCode}
-            </button>
-        `;
+    <button class="promo-tag-btn ${selected ? 'selected' : ''}" data-promo-id="${t.id}">
+        <span class="order">${order}</span>
+        ${displayCode}
+    </button>
+`;
     }).join('');
 
     grid.querySelectorAll('.promo-tag-btn').forEach(btn => {
