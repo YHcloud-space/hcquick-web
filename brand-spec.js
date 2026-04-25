@@ -167,12 +167,13 @@ function renderSpecs() {
         </button>
     `).join('');
     
-    // brand-spec.js → renderSpecs 函数内
+    // 【新增】替换为以下代码，只保留长按事件
 specGrid.querySelectorAll('.grid-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        selectedSpecId = parseInt(btn.dataset.specId);
-        enterCalcPage();  // 直接进入材料计算页面
+    bindLongPress(btn, () => {
+        const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
+        showSpecContextMenu(spec, btn);
     });
+});
     // 长按事件保持不变
     bindLongPress(btn, () => {
         const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
