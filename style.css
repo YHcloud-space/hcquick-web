@@ -239,20 +239,27 @@ body {
     padding-top: 10vh;               /* 顶部留一些空间 */
 }
 #promo-dialog {
-    background: #FFFFFF;
+    background: #E6F0FA;
     border-radius: 12px;
     width: 90%;
     max-width: 400px;
-    max-height: 60vh;                /* 限制最高 60% 屏幕 */
+    max-height: 35vh;                /* 限制最高 35% 屏幕 */
     padding: 16px;
     display: flex;
     flex-direction: column;
 }
 #promo-dialog-close {
-    position: sticky;                /* 固定在底部 */
-    bottom: 0;
-    background: #F5F5F5;
-    margin-top: auto;                /* 推到对话框底部 */
+    margin-top: 12px;
+    background: #FFFFFF;        /* 或浅色按钮 */
+    border-radius: 8px;
+    height: 48px;               /* 增大点击区域 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
 }
 #promo-dialog-title {
     font-size: 16px;
@@ -276,8 +283,8 @@ body {
     overflow-y: auto;
     margin-bottom: 12px;
     background: #FFFFFF;                           /* 网格区白色背景 */
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: 12px;
+    padding: 12px;
 }
 .promo-grid {
     display: grid;
@@ -451,6 +458,7 @@ body {
 /* 输入框正常可选中 */
 #input-x,
 #promo-search,
+height: 50px;
 input[type="text"] {
     -webkit-user-select: text;
     user-select: text;
