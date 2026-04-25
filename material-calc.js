@@ -8,6 +8,9 @@ const materialGrid = document.getElementById('material-grid');
 const promoCard = document.getElementById('promo-card');
 const subOptions = document.getElementById('sub-options');
 const propertyCard = document.getElementById('property-card');
+inputX.addEventListener('focus', function() {
+    this.value = '';
+});
 
 let selectedMaterial = null;
 let selectedPromoTag = null;
