@@ -90,6 +90,7 @@ function renderMaterials() {
             selectedMaterial = materialsData.find(m => m.id === parseInt(btn.dataset.matId));
             selectedPromoTag = null;
             updateCalcUI();
+            inputX.focus();
         });
     });
 }
@@ -207,6 +208,10 @@ function openPromoDialog() {
     searchInput.value = '';
     dialog.style.display = 'flex';
     renderPromoTags('');
+    // [新增] 自动聚焦到促销标签搜索框，让键盘保持弹出
+    setTimeout(() => {
+        searchInput.focus();
+    }, 100);
 }
 
 function closePromoDialog() {
