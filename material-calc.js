@@ -13,6 +13,7 @@ inputX.addEventListener('focus', function() {
 });
 
 let selectedMaterial = null;
+let isFirstMaterialClick = true;
 let selectedPromoTag = null;
 let rollCount = 1;
 let peelMode = 'NONE';
@@ -28,6 +29,7 @@ specGrid.addEventListener('click', (e) => {
 
 function enterCalcPage() {
     isInCalcPage = true;
+    isFirstMaterialClick = true;
     const spec = specsData.find(s => s.id === selectedSpecId);
     const brand = brandsData.find(b => b.id === spec?.brand_id);
     titleEl.textContent = `${currentLine}线 - ${spec?.name || ''}`;
@@ -47,6 +49,7 @@ function enterCalcPage() {
 
 function backToBrandSpec() {
     isInCalcPage = false;
+    isFirstMaterialClick = true;
     calcPage.style.display = 'none';
     document.getElementById('brand-spec-page').style.display = 'block';
     
@@ -57,20 +60,27 @@ function backToBrandSpec() {
     selectedPromoTag = null;
     inputX.value = '';
     resultBox.textContent = '0.0';
+    // ✅ 重置促销标签卡片
+    promoCard.textContent = '促销标签: 请选择代码';
+    promoCard.classList.remove('active');
+    
+    // ✅ 重置瓶子累计
+    bottleAccum = { expression: '', totalEA: 0 };
+    
     titleEl.textContent = selectedBrandId 
         ? `${currentLine}线-${brandsData.find(b => b.id === selectedBrandId)?.name || ''}`
         : 'HCQuick';
     renderSpecs();
     (async () => {
-    try {
-        const logs = await getAllLogs();
-        if (logs.length > 0) {
-            setTimeout(() => {
-                alert('您有未同步的本地修改，请确认修改正确后联系管理员更新主数据。');
-            }, 300);
-        }
-    } catch (e) {}
-})();
+        try {
+            const logs = await getAllLogs();
+            if (logs.length > 0) {
+                setTimeout(() => {
+                    alert('您有未同步的本地修改，请确认修改正确后联系管理员更新主数据。');
+                }, 300);
+            }
+        } catch (e) {}
+    })();
 }
 
 // ==================== 材料渲染 ====================
@@ -89,13 +99,17 @@ function renderMaterials() {
         btn.addEventListener('click', () => {
             selectedMaterial = materialsData.find(m => m.id === parseInt(btn.dataset.matId));
             selectedPromoTag = null;
-            resultBox.textContent = '0.0';   // ← 新增此行，清空结果区
-            inputX.value = '';               // ← 确认输入框也被清空
-            updateCalcUI();
-            inputX.focus();
-        });
+            // 首次点击材料：不清空输入框，直接计算
+        if (!isFirstMaterialClick) {
+            inputX.value = '';
+            resultBox.textContent = '0.0';
+        }
+        isFirstMaterialClick = false;   // 标记已成非首次
+        
+        updateCalcUI();
+        inputX.focus();
     });
-}
+});
 
 // ==================== 规格上下文菜单（在材料计算 JS 中，因为需要长按规格时调用，但实际已在 brand-spec.js 中定义，此处无需重复） ====================
 // 注意：showSpecContextMenu、editSpec、deleteSpec、showAddSpecDialog 已在 brand-spec.js 中定义
