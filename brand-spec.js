@@ -167,21 +167,14 @@ function renderSpecs() {
         </button>
     `).join('');
     
-    // 【新增】替换为以下代码，只保留长按事件
-specGrid.querySelectorAll('.grid-btn').forEach(btn => {
-    bindLongPress(btn, () => {
-        const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
-        showSpecContextMenu(spec, btn);
+    // 只保留长按事件（仅此一处，无需重复）
+    specGrid.querySelectorAll('.grid-btn').forEach(btn => {
+        bindLongPress(btn, () => {
+            const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
+            showSpecContextMenu(spec, btn);
+        });
     });
-});
-    // 长按事件保持不变
-    bindLongPress(btn, () => {
-        const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
-        showSpecContextMenu(spec, btn);
-    });
-});
 }
-
 // ==================== 线号切换 ====================
 lineBtns.forEach(btn => {
     btn.addEventListener('click', () => {
