@@ -318,3 +318,10 @@ function selectPromoTag(promo) {
     
     updateCalcUI();
 }
+// material-calc.js → 文件最底部，在所有函数定义之后
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('grid-btn') && e.target.dataset.specId) {
+        selectedSpecId = parseInt(e.target.dataset.specId);
+        enterCalcPage();
+    }
+});
