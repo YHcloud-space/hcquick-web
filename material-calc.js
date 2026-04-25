@@ -39,6 +39,7 @@ function enterCalcPage() {
         propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格备注: ${spec.remark}</div>`;
     }
     updateCalcUI();
+    inputX.focus(); // 新增
 }
 
 function backToBrandSpec() {
@@ -197,6 +198,7 @@ function openPromoDialog() {
 
 function closePromoDialog() {
     document.getElementById('promo-dialog-overlay').style.display = 'none';
+    inputX.focus(); // 新增
 }
 
 document.getElementById('promo-search').addEventListener('input', (e) => {
