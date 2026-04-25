@@ -59,8 +59,13 @@
         <!-- ==================== 材料计算页面 ==================== -->
         <div id="calc-page" style="display:none;">
             <div id="input-row">
-    <div class="x-input-area">
-        <span>X (kg) =</span>
+    <div class="x-input-wrapper">
+        <label class="x-label">X (kg)</label>
+        <input type="text" id="input-x" inputmode="decimal">
+    </div>
+    <div class="equal-sign">=</div>
+    <div id="result-box">0.0</div>
+</div>
         <input type="text" id="input-x" placeholder="X (kg)" inputmode="decimal">
     </div>
     <div class="equal-sign">=</div>
