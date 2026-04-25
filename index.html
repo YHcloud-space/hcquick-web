@@ -10,109 +10,53 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
-   <!-- 促销标签选择对话框 -->
-<div id="promo-dialog-overlay" style="display:none;">
-    <div id="promo-dialog">
-        <div id="promo-dialog-title">选择促销标签</div>
-        <input type="text" id="promo-search" placeholder="输入Code数字检索" inputmode="numeric">
-        <div id="promo-grid-container">
-            <div id="promo-grid" class="promo-grid"></div>
-        </div>
-        <button id="promo-dialog-close">关闭</button>
-    </div>
-</div> 
-    <!-- 同步确认弹窗 -->
-<div id="sync-confirm-overlay" style="display:none;">
-    <div id="sync-confirm-dialog">
-        <div id="sync-confirm-title">⚠️ 强制同步确认</div>
-        <div id="sync-confirm-body">以下本地修改将被服务器数据覆盖：</div>
-        <div id="sync-confirm-list"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-            <button id="sync-confirm-cancel" class="dialog-btn-cancel">取消</button>
-            <button id="sync-confirm-ok" class="dialog-btn-danger">强制更新</button>
-        </div>
-    </div>
-</div>
 <body>
+
     <div id="app">
-                <!-- 顶部标题栏 -->
+
+        <!-- ==================== 顶部标题栏 ==================== -->
         <div id="top-bar">
             <span id="nav-icon"></span>
             <span id="back-btn" style="display:none;" onclick="backToBrandSpec()"><</span>
             <span id="title">HCQuick</span>
             <span id="menu-btn" style="position:relative;">
-    ⊕
-    <span id="menu-badge-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:#E53935;border-radius:50%;"></span>
-</span>
+                ⊕
+                <span id="menu-badge-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:#E53935;border-radius:50%;"></span>
+            </span>
         </div>
-                <!-- 下拉菜单 -->
+
+        <!-- ==================== 下拉菜单 ==================== -->
         <div id="dropdown-menu" style="display:none;">
             <div class="menu-item" onclick="showAddBrandDialog()">+ 增加品牌</div>
             <div class="menu-item" onclick="showAddSpecDialog()">+ 增加规格</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="handleSync()">
-    🔄 同步
-    <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
-</div>
+                🔄 同步
+                <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
+            </div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
             <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
         </div>
-    </div>
 
-    <!-- 设置对话框 -->
-    <div id="settings-overlay" style="display:none;">
-        <div id="settings-dialog">
-            <div id="settings-title">设置</div>
-            <div id="settings-content">
-                <div style="display:flex;justify-content:space-around;margin-bottom:12px;">
-                    <label><input type="radio" name="syncMode" value="standalone" id="radio-standalone" onchange="setSyncMode('standalone')"> 单机版</label>
-<label><input type="radio" name="syncMode" value="netdisk" id="radio-netdisk" onchange="setSyncMode('netdisk')"> 云盘版</label>
-                </div>
-                <div class="divider"></div>
-                <div style="display:flex;gap:8px;margin:12px 0;">
-                    <button onclick="importJson()" style="flex:1;height:36px;background:#4CAF50;color:#fff;border:none;border-radius:8px;">📁 导入</button>
-                    <button onclick="exportJson()" style="flex:1;height:36px;background:#2196F3;color:#fff;border:none;border-radius:8px;">📤 导出</button>
-                </div>
-                <div style="margin-top:8px;">
-  <div style="font-size:13px;font-weight:500;margin-bottom:2px;">自定义服务器地址（云盘版）</div>
-  <input type="text" id="settings-base-url" placeholder="基础 URL" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
-  <input type="text" id="settings-data-file" placeholder="数据文件名" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
-  <input type="text" id="settings-version-file" placeholder="版本文件名" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
-  <div style="font-size:10px;color:#888;margin-top:4px;">完整数据 URL 预览: <span id="settings-url-preview">-</span></div>
-</div>
-                <div style="font-size:12px;color:#888;margin:8px 0;">Data版本: <span id="settings-data-version">-</span></div>
-                <div style="font-size:12px;color:#888;margin:8px 0;">APK版本: <span id="settings-apk-version">-</span></div>
+        <!-- ==================== 品牌/规格页面 ==================== -->
+        <div id="brand-spec-page">
+            <div id="line-selector">
+                <button class="line-btn selected" data-line="V">V</button>
+                <button class="line-btn" data-line="C">C</button>
+                <button class="line-btn" data-line="R">R</button>
             </div>
-            
-            <div style="display:flex;gap:8px;margin-top:12px;">
-                <div style="display:flex;gap:8px;margin-top:12px;">
-    <button onclick="closeSettingsDialog()" style="flex:1;height:36px;border:1px solid #E5E5E5;border-radius:8px;background:#fff;">取消</button>
-    <button onclick="saveAndRestart()" style="flex:1;height:36px;border:none;border-radius:8px;background:#4CAF50;color:#fff;font-size:14px;">保存并重启</button>
+            <div class="section">
+                <div class="section-title">品牌</div>
+                <div id="brand-grid" class="grid-container"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">规格</div>
+                <div id="spec-grid" class="grid-container"></div>
             </div>
         </div>
-    </div>
-<div id="brand-spec-page">
-        <!-- 线号切换 -->
-        <div id="line-selector">
-            <button class="line-btn selected" data-line="V">V</button>
-            <button class="line-btn" data-line="C">C</button>
-            <button class="line-btn" data-line="R">R</button>
-        </div>
 
-        <!-- 品牌区域 -->
-        <div class="section">
-            <div class="section-title">品牌</div>
-            <div id="brand-grid" class="grid-container"></div>
-        </div>
-
-        <!-- 规格区域 -->
-        <div class="section">
-            <div class="section-title">规格</div>
-            <div id="spec-grid" class="grid-container"></div>
-        </div>
-       </div>   <!-- ← 新增结束 -->
-                <!-- 材料计算页面 -->
+        <!-- ==================== 材料计算页面 ==================== -->
         <div id="calc-page" style="display:none;">
             <div id="input-row">
                 <input type="text" id="input-x" placeholder="X (kg)" inputmode="decimal">
@@ -125,11 +69,68 @@
             <div id="property-card"></div>
         </div>
 
-    <script src="db.js"></script>
-<script src="brand-spec.js"></script>
-<script src="material-calc.js"></script>
+    </div>
 
-    <!-- 注册 Service Worker -->
+    <!-- ==================== 促销标签选择对话框 ==================== -->
+    <div id="promo-dialog-overlay" style="display:none;">
+        <div id="promo-dialog">
+            <div id="promo-dialog-title">选择促销标签</div>
+            <input type="text" id="promo-search" placeholder="输入Code数字检索" inputmode="numeric">
+            <div id="promo-grid-container">
+                <div id="promo-grid" class="promo-grid"></div>
+            </div>
+            <button id="promo-dialog-close">关闭</button>
+        </div>
+    </div>
+
+    <!-- ==================== 同步确认弹窗 ==================== -->
+    <div id="sync-confirm-overlay" style="display:none;">
+        <div id="sync-confirm-dialog">
+            <div id="sync-confirm-title">⚠️ 强制同步确认</div>
+            <div id="sync-confirm-body">以下本地修改将被服务器数据覆盖：</div>
+            <div id="sync-confirm-list"></div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button id="sync-confirm-cancel" class="dialog-btn-cancel">取消</button>
+                <button id="sync-confirm-ok" class="dialog-btn-danger">强制更新</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 设置对话框 ==================== -->
+    <div id="settings-overlay" style="display:none;">
+        <div id="settings-dialog">
+            <div id="settings-title">设置</div>
+            <div id="settings-content">
+                <div style="display:flex;justify-content:space-around;margin-bottom:12px;">
+                    <label><input type="radio" name="syncMode" value="standalone" id="radio-standalone" onchange="setSyncMode('standalone')"> 单机版</label>
+                    <label><input type="radio" name="syncMode" value="netdisk" id="radio-netdisk" onchange="setSyncMode('netdisk')"> 云盘版</label>
+                </div>
+                <div class="divider"></div>
+                <div style="display:flex;gap:8px;margin:12px 0;">
+                    <button onclick="importJson()" style="flex:1;height:36px;background:#4CAF50;color:#fff;border:none;border-radius:8px;">📁 导入</button>
+                    <button onclick="exportJson()" style="flex:1;height:36px;background:#2196F3;color:#fff;border:none;border-radius:8px;">📤 导出</button>
+                </div>
+                <div style="margin-top:8px;">
+                    <div style="font-size:13px;font-weight:500;margin-bottom:2px;">自定义服务器地址（云盘版）</div>
+                    <input type="text" id="settings-base-url" placeholder="基础 URL" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
+                    <input type="text" id="settings-data-file" placeholder="数据文件名" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
+                    <input type="text" id="settings-version-file" placeholder="版本文件名" style="width:100%;margin-top:4px;padding:6px;font-size:12px;border:1px solid #E5E5E5;border-radius:4px;" onchange="updateUrlPreview()">
+                    <div style="font-size:10px;color:#888;margin-top:4px;">完整数据 URL 预览: <span id="settings-url-preview">-</span></div>
+                </div>
+                <div style="font-size:12px;color:#888;margin:8px 0;">Data版本: <span id="settings-data-version">-</span></div>
+                <div style="font-size:12px;color:#888;margin:8px 0;">APK版本: <span id="settings-apk-version">-</span></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button onclick="closeSettingsDialog()" style="flex:1;height:36px;border:1px solid #E5E5E5;border-radius:8px;background:#fff;">取消</button>
+                <button onclick="saveAndRestart()" style="flex:1;height:36px;border:none;border-radius:8px;background:#4CAF50;color:#fff;font-size:14px;">保存并重启</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
+    <script src="brand-spec.js"></script>
+    <script src="material-calc.js"></script>
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
