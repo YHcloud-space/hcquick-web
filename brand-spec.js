@@ -507,9 +507,23 @@ function exportJson() {
 
 // ==================== 启动 ====================
 (async () => {
-  await loadFromCache();
-  if (localVersion > 0) {
-    loadData().catch(() => {});
+  await openDB(); // 确保数据库打开
+  const brands = await getAll('brands');
+  if (brands.length > 0) {
+    // 已有缓存：按原逻辑处理
+    brandsData = brands;
+    specsData = await getAll('specs');
+    materialsData = await getAll('materials');
+    const version = await getMeta('local_version');
+    localVersion = parseInt(version) || 0;
+    renderBrands();
+    renderSpecs();
+    if (localVersion > 0) {
+      loadData().catch(() => {});
+    }
+  } else {
+    // 首次访问：自动拉取 JSON
+    await loadData();
   }
 })();
 
