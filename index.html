@@ -40,7 +40,10 @@
             <span id="nav-icon"></span>
             <span id="back-btn" style="display:none;" onclick="backToBrandSpec()"><</span>
             <span id="title">HCQuick</span>
-            <span id="menu-btn">⊕</span>
+            <span id="menu-btn" style="position:relative;">
+    ⊕
+    <span id="menu-badge-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:#E53935;border-radius:50%;"></span>
+</span>
         </div>
                 <!-- 下拉菜单 -->
         <div id="dropdown-menu" style="display:none;">
@@ -48,9 +51,9 @@
             <div class="menu-item" onclick="showAddSpecDialog()">+ 增加规格</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="handleSync()">
-                🔄 同步
-                <span id="menu-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;padding:2px 6px;font-size:10px;margin-left:8px;">1</span>
-            </div>
+    🔄 同步
+    <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
+</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
             <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
