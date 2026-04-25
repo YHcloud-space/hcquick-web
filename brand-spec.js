@@ -423,7 +423,11 @@ document.getElementById('settings-version-file').addEventListener('change', asyn
 function closeSettingsDialog() {
     document.getElementById('settings-overlay').style.display = 'none';
 }
-
+function saveAndRestart() {
+    // 同步模式已在切换时自动保存，URL字段也在change时自动保存
+    // 这里直接重启页面，确保所有设置生效
+    location.reload();
+}
 // ==================== 日志对话框 ====================
 function showLogDialog() {
     menuVisible = false;
