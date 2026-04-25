@@ -222,7 +222,7 @@ body {
     cursor: pointer;
     white-space: nowrap;
     padding: 0 12px;      /* 内边距防止文字贴边 */
-    overflow: hidden;
+    overflow: visible;
     text-overflow: ellipsis;
     position: relative;
 }
@@ -231,13 +231,14 @@ body {
     position: absolute;
     top: -10px;
     right: 10px;
-    background: #FFF0F5;          /* 与结果框背景色一致，遮挡边框 */
-    color: #757575;               /* 与 .x-label 颜色一致 */
-    font-size: 12px;              /* 与 .x-label 字号一致 */
+    background: #FFFFFF;          /* 白色背景，与页面底色一致，形成"镂空"效果 */
+    color: #757575;
+    font-size: 12px;
     font-weight: 400;
     padding: 0 4px;
     line-height: 1;
     pointer-events: none;
+    z-index: 1;                   /* 确保在结果区数字上方 */
 }
 
 #material-grid {
