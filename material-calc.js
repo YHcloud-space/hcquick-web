@@ -58,6 +58,16 @@ function backToBrandSpec() {
         ? `${currentLine}线-${brandsData.find(b => b.id === selectedBrandId)?.name || ''}`
         : 'HCQuick';
     renderSpecs();
+    (async () => {
+    try {
+        const logs = await getAllLogs();
+        if (logs.length > 0) {
+            setTimeout(() => {
+                alert('您有未同步的本地修改，请确认修改正确后联系管理员更新主数据。');
+            }, 300);
+        }
+    } catch (e) {}
+})();
 }
 
 // ==================== 材料渲染 ====================
