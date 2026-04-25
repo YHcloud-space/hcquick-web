@@ -162,9 +162,7 @@ body {
     min-width: 0;      /* 防止 flex 溢出 */
 }
 .x-input-area span {
-    font-size: 14px;
-    white-space: nowrap;
-    margin-right: 8px;
+    display: none;
 }
 #input-x {
     flex: 1;
