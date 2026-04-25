@@ -9,6 +9,22 @@ let specsData = [];
 let materialsData = [];
 let localVersion = 0;
 
+// ==================== 红点更新（检查本地日志） ====================
+async function updateBadge() {
+    try {
+        const logs = await getAllLogs();
+        const hasChanges = logs.length > 0;
+        const syncBadge = document.getElementById('sync-badge');
+        if (syncBadge) {
+            syncBadge.style.display = hasChanges ? 'inline-flex' : 'none';
+            if (hasChanges) syncBadge.textContent = logs.length;
+        }
+    } catch (e) {
+        const syncBadge = document.getElementById('sync-badge');
+        if (syncBadge) syncBadge.style.display = 'none';
+    }
+}
+
 // ==================== 从 IndexedDB 加载缓存数据 ====================
 async function loadFromCache() {
   try {
@@ -24,7 +40,7 @@ async function loadFromCache() {
       localVersion = parseInt(version) || 0;
       renderBrands();
       renderSpecs();
-      updateBadge()
+      updateBadge();
       console.log('从缓存加载成功，版本:', localVersion);
     } else {
       console.log('缓存为空，等待首次同步');
@@ -105,11 +121,10 @@ function renderBrands() {
             selectedBrandId = parseInt(btn.dataset.brandId);
             renderBrands();
             renderSpecs();
-          const brand = brandsData.find(b => b.id === selectedBrandId);
-    if (brand) {
-        titleEl.textContent = `${currentLine}线-${brand.name}`;
-    }
-
+            const brand = brandsData.find(b => b.id === selectedBrandId);
+            if (brand) {
+                titleEl.textContent = `${currentLine}线 - ${brand.name}`;
+            }
         });
         
         bindLongPress(btn, () => {
@@ -169,28 +184,24 @@ let isInCalcPage = false;
 
 function renderMenu() {
     const menu = document.getElementById('dropdown-menu');
+    const syncHTML = `
+        <div class="menu-item" onclick="handleSync()">
+            🔄 同步
+            <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
+        </div>`;
+    const logHTML = `<div class="menu-item" onclick="showLogDialog()">📋 日志</div>`;
+    const settingsHTML = `<div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>`;
     if (isInCalcPage) {
-        menu.innerHTML = `
-            <div class="menu-item" onclick="handleSync()">
-    🔄 同步
-    <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
-</div>
-            <div class="divider"></div>
-            <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
-            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
-        `;
+        menu.innerHTML = syncHTML + `<div class="divider"></div>` + logHTML + settingsHTML;
     } else {
         menu.innerHTML = `
             <div class="menu-item" onclick="showAddBrandDialog()">+ 增加品牌</div>
             <div class="menu-item" onclick="showAddSpecDialog()">+ 增加规格</div>
             <div class="divider"></div>
-            <div class="menu-item" onclick="handleSync()">
-    🔄 同步
-    <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
-</div>
+            ${syncHTML}
             <div class="divider"></div>
-            <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
-            <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
+            ${logHTML}
+            ${settingsHTML}
         `;
     }
 }
@@ -199,6 +210,7 @@ menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!menuVisible) {
         renderMenu();
+        updateBadge(); // 每次打开菜单前刷新红点状态
         menuVisible = true;
         document.getElementById('dropdown-menu').style.display = 'block';
     } else {
@@ -212,10 +224,26 @@ document.addEventListener('click', () => {
     document.getElementById('dropdown-menu').style.display = 'none';
 });
 
-function handleSync() {
+// ==================== 同步处理 ====================
+async function handleSync() {
     menuVisible = false;
     document.getElementById('dropdown-menu').style.display = 'none';
-    checkAndSync();
+    
+    // 1. 检查是否有本地修改日志
+    const logs = await getAllLogs();
+    if (logs.length > 0) {
+        checkAndSync(); // 有日志则弹窗确认
+        return;
+    }
+    
+    // 2. 无本地修改，直接进行数据更新
+    const oldVersion = localVersion;
+    await loadData();
+    if (localVersion > oldVersion) {
+        location.reload(); // 有新版本，刷新页面
+    } else {
+        alert('数据已是最新版本');
+    }
 }
 
 async function checkAndSync() {
@@ -224,30 +252,17 @@ async function checkAndSync() {
         if (logs.length > 0) {
             showSyncConfirmDialog(logs);
         } else {
+            // 正常情况下不会走到这里（handleSync已判断），但保留兜底
             await loadData();
+            location.reload();
         }
     } catch (e) {
         console.error('检查日志失败:', e);
         await loadData();
+        location.reload();
     }
 }
-// ==================== 红点更新 ====================
-async function updateBadge() {
-    try {
-        const logs = await getAllLogs();
-        const hasChanges = logs.length > 0;
-        document.getElementById('menu-badge-dot').style.display = hasChanges ? 'block' : 'none';
-        const syncBadge = document.getElementById('sync-badge');
-        if (syncBadge) {
-            syncBadge.style.display = hasChanges ? 'inline-flex' : 'none';
-            if (hasChanges) syncBadge.textContent = logs.length;
-        }
-    } catch (e) {
-        document.getElementById('menu-badge-dot').style.display = 'none';
-        const syncBadge = document.getElementById('sync-badge');
-        if (syncBadge) syncBadge.style.display = 'none';
-    }
-}
+
 // ==================== 长按工具 ====================
 function bindLongPress(element, callback) {
     let timer;
@@ -266,7 +281,6 @@ function showBrandContextMenu(brand, element) {
     document.querySelector('.context-menu')?.remove();
     
     const menu = document.createElement('div');
-    
     menu.className = 'context-menu';
     menu.innerHTML = `
         <div class="context-item" onclick="editBrand(${brand.id})">编辑</div>
@@ -319,10 +333,8 @@ async function editBrand(id) {
         
         brandsData = await getAll('brands');
         renderBrands();
-        if (selectedBrandId === id) {
-            renderSpecs();
-            updateBadge();
-        }
+        if (selectedBrandId === id) renderSpecs();
+        updateBadge();
     }
     document.querySelector('.context-menu')?.remove();
 }
@@ -404,7 +416,6 @@ async function showAddBrandDialog() {
     }
 }
 
-
 // ==================== 设置对话框 ====================
 async function showSettingsDialog() {
     menuVisible = false;
@@ -417,10 +428,14 @@ async function showSettingsDialog() {
     const radio = document.querySelector(`input[name="syncMode"][value="${currentMode}"]`);
     if (radio) radio.checked = true;
 
-    // 读取自定义 URL
-    const baseUrl = await getMeta('custom_base_url') || '';
-    const dataFile = await getMeta('custom_data_file') || '';
-    const versionFile = await getMeta('custom_version_file') || '';
+    // 预填默认服务器地址
+    const DEFAULT_BASE = 'https://data.cloudgj.cn/';
+    const DEFAULT_DATA_FILE = 'hcquick_data.json';
+    const DEFAULT_VERSION_FILE = 'version.txt';
+    const baseUrl = await getMeta('custom_base_url') || DEFAULT_BASE;
+    const dataFile = await getMeta('custom_data_file') || DEFAULT_DATA_FILE;
+    const versionFile = await getMeta('custom_version_file') || DEFAULT_VERSION_FILE;
+    
     document.getElementById('settings-base-url').value = baseUrl;
     document.getElementById('settings-data-file').value = dataFile;
     document.getElementById('settings-version-file').value = versionFile;
@@ -441,7 +456,7 @@ function updateUrlPreview() {
     document.getElementById('settings-url-preview').textContent = base + dataFile;
 }
 
-// 输入框内容变更时自动保存到 Metadata
+// 输入框自动保存
 document.getElementById('settings-base-url').addEventListener('change', async function() {
     await putMeta('custom_base_url', this.value);
     updateUrlPreview();
@@ -458,11 +473,11 @@ document.getElementById('settings-version-file').addEventListener('change', asyn
 function closeSettingsDialog() {
     document.getElementById('settings-overlay').style.display = 'none';
 }
+
 function saveAndRestart() {
-    // 同步模式已在切换时自动保存，URL字段也在change时自动保存
-    // 这里直接重启页面，确保所有设置生效
     location.reload();
 }
+
 // ==================== 日志对话框 ====================
 function showLogDialog() {
     menuVisible = false;
@@ -505,32 +520,9 @@ function exportJson() {
     URL.revokeObjectURL(url);
 }
 
-// ==================== 启动 ====================
-(async () => {
-  await openDB(); // 确保数据库打开
-  const brands = await getAll('brands');
-  if (brands.length > 0) {
-    // 已有缓存：按原逻辑处理
-    brandsData = brands;
-    specsData = await getAll('specs');
-    materialsData = await getAll('materials');
-    const version = await getMeta('local_version');
-    localVersion = parseInt(version) || 0;
-    renderBrands();
-    renderSpecs();
-    if (localVersion > 0) {
-      loadData().catch(() => {});
-    }
-  } else {
-    // 首次访问：自动拉取 JSON
-    await loadData();
-  }
-})();
-
-
 // ==================== 规格上下文菜单 ====================
 function showSpecContextMenu(spec, element) {
-  document.querySelector('.context-menu')?.remove();
+    document.querySelector('.context-menu')?.remove();
     const menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.innerHTML = `
@@ -539,12 +531,10 @@ function showSpecContextMenu(spec, element) {
         <div class="context-item" style="color:#E53935;" onclick="deleteSpec(${spec.id})">删除</div>
     `;
     document.body.appendChild(menu);
-    
     const rect = element.getBoundingClientRect();
     menu.style.left = rect.left + 'px';
     menu.style.top = rect.bottom + 4 + 'px';
     menu.style.display = 'block';
-    
     const closeMenu = (e) => {
         if (!menu.contains(e.target)) {
             menu.remove();
@@ -572,7 +562,6 @@ async function editSpec(id) {
             request.onsuccess = resolve;
             request.onerror = reject;
         });
-        
         const logData = {
             type: 'UPDATE',
             table: 'specs',
@@ -585,7 +574,6 @@ async function editSpec(id) {
             data_json: JSON.stringify(logData),
             created_at: Math.floor(Date.now() / 1000)
         });
-        
         specsData = await getAll('specs');
         renderSpecs();
         updateBadge();
@@ -604,7 +592,6 @@ async function deleteSpec(id) {
         request.onsuccess = resolve;
         request.onerror = reject;
     });
-    
     const logData = {
         type: 'DELETE',
         table: 'specs',
@@ -617,7 +604,6 @@ async function deleteSpec(id) {
         data_json: JSON.stringify(logData),
         created_at: Math.floor(Date.now() / 1000)
     });
-    
     specsData = await getAll('specs');
     renderSpecs();
     updateBadge();
@@ -652,7 +638,6 @@ async function showAddSpecDialog() {
             request.onsuccess = resolve;
             request.onerror = reject;
         });
-        
         const logData = {
             type: 'INSERT',
             table: 'specs',
@@ -665,7 +650,6 @@ async function showAddSpecDialog() {
             data_json: JSON.stringify(logData),
             created_at: Math.floor(Date.now() / 1000)
         });
-        
         specsData = await getAll('specs');
         renderSpecs();
         updateBadge();
@@ -700,4 +684,29 @@ document.getElementById('sync-confirm-cancel').addEventListener('click', () => {
 document.getElementById('sync-confirm-ok').addEventListener('click', async () => {
     document.getElementById('sync-confirm-overlay').style.display = 'none';
     await loadData();
+    location.reload(); // 强制刷新，应用新数据
 });
+
+// ==================== 启动 ====================
+(async () => {
+    await openDB();
+    const brands = await getAll('brands');
+    if (brands.length > 0) {
+        // 已有缓存数据
+        brandsData = brands;
+        specsData = await getAll('specs');
+        materialsData = await getAll('materials');
+        const version = await getMeta('local_version');
+        localVersion = parseInt(version) || 0;
+        renderBrands();
+        renderSpecs();
+        updateBadge();
+        if (localVersion > 0) {
+            loadData().catch(() => {});
+        }
+    } else {
+        // 首次访问：自动拉取最新数据
+        await loadData();
+        updateBadge();
+    }
+})();
