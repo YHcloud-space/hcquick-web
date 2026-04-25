@@ -170,9 +170,23 @@ body {
     text-align: center;   /* 光标居中 */
     font-size: 18px;
     outline: none;
+    transition: border-color 0.2s;  /* 新增：平滑过渡 */
     min-width: 0;         /* 允许收缩 */
     background: transparent;
 }
+/* 输入框获得焦点时，边框变黄色 */
+#input-x:focus {
+    border-color: #FFA726;      /* 橙黄色边框 */
+    border-width: 2px;          /* 加粗一点更明显 */
+}
+/* X(kg) 的占位文本颜色调浅 */
+#input-x::placeholder {
+    color: #BDBDBD;
+    font-size: 14px;
+    text-align: left;          /* 占位文字左对齐 */
+    vertical-align: top;       /* 靠上 */
+}
+
 /* 等号 - 不伸缩，居中 */
 .equal-sign {
     text-align: center;
