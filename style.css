@@ -195,7 +195,7 @@ body {
     border-color: #64B5F6;    /* 浅蓝色边框，与按钮选中态一致 */
     border-width: 1px;        /* 保持正常粗细，不需要加粗 */
 }
-}
+
 /* X(kg) 的占位文本颜色调浅 */
 #input-x::placeholder {
     color: #757575;
@@ -226,6 +226,7 @@ body {
     overflow: visible;
     text-overflow: ellipsis;
     position: relative;
+    
 }
 #result-box::after {
     content: "EA";
@@ -250,7 +251,25 @@ body {
     max-height: 144px;
     overflow-y: auto;
 }
+/* EA 标签外层容器（相对定位锚点） */
+.result-wrapper {
+    position: relative;
+}
 
+/* EA 标签 */
+.result-label {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: #FFF0F5;
+    color: #757575;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 0 4px;
+    line-height: 1;
+    z-index: 2;
+    pointer-events: none;
+}
 
 /* 促销标签卡片 — 默认（未选中）状态 */
 #promo-card {
@@ -271,16 +290,10 @@ body {
 
 /* 促销标签卡片 — 选中状态 */
 #promo-card.active {
-    background: #BBDEFB;           /* 浅蓝背景 */
+    background: #BBDEFB;
     border-color: #64B5F6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    color: #1565C0;               /* ← 选中时的文字颜色（深蓝） */
-}
-
-#promo-card.active {
-    background: #BBDEFB;           /* 选中时浅蓝 */
-    border-color: #64B5F6;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    color: #1565C0;
 }
 
 /* 子选项 */
