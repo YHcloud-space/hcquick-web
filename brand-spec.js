@@ -234,7 +234,10 @@ function bindLongPress(element, callback) {
 
 // ==================== 品牌上下文菜单 ====================
 function showBrandContextMenu(brand, element) {
+    document.querySelector('.context-menu')?.remove();
+    
     const menu = document.createElement('div');
+    
     menu.className = 'context-menu';
     menu.innerHTML = `
         <div class="context-item" onclick="editBrand(${brand.id})">编辑</div>
@@ -481,6 +484,7 @@ function exportJson() {
 
 // ==================== 规格上下文菜单 ====================
 function showSpecContextMenu(spec, element) {
+  document.querySelector('.context-menu')?.remove();
     const menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.innerHTML = `
