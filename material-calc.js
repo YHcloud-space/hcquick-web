@@ -317,7 +317,7 @@ function selectPromoTag(promo) {
     resultBox.textContent = '0.0';
     
     updateCalcUI();
-}  // ← 确保 selectPromoTag 的闭合花括号在这里
+}
 
 // material-calc.js → 文件最底部，在所有函数定义之后
 document.addEventListener('click', function(e) {
@@ -326,4 +326,3 @@ document.addEventListener('click', function(e) {
         enterCalcPage();
     }
 });
-}
