@@ -351,9 +351,9 @@ body {
     background: #FFFFFF;
     border: none;
     border-radius: 8px;
-    height: 48px;               /* 大点击区域 */
+    height: 60px;               /* 大点击区域 */
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 400;
     cursor: pointer;
     display: flex;
     align-items: center;
