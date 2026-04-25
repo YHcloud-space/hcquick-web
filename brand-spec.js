@@ -167,16 +167,18 @@ function renderSpecs() {
         </button>
     `).join('');
     
-    specGrid.querySelectorAll('.grid-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            selectedSpecId = parseInt(btn.dataset.specId);
-            enterCalcPage();
-        });
-        bindLongPress(btn, () => {
-            const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
-            showSpecContextMenu(spec, btn);
-        });
+    // brand-spec.js → renderSpecs 函数内
+specGrid.querySelectorAll('.grid-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        selectedSpecId = parseInt(btn.dataset.specId);
+        enterCalcPage();  // 直接进入材料计算页面
     });
+    // 长按事件保持不变
+    bindLongPress(btn, () => {
+        const spec = specsData.find(s => s.id === parseInt(btn.dataset.specId));
+        showSpecContextMenu(spec, btn);
+    });
+});
 }
 
 // ==================== 线号切换 ====================
