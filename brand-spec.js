@@ -24,6 +24,7 @@ async function loadFromCache() {
       localVersion = parseInt(version) || 0;
       renderBrands();
       renderSpecs();
+      updateBadge()
       console.log('从缓存加载成功，版本:', localVersion);
     } else {
       console.log('缓存为空，等待首次同步');
@@ -76,6 +77,7 @@ async function loadData() {
     selectedSpecId = null;
     
     console.log('同步完成，版本:', localVersion);
+    updateBadge();
   } catch (e) {
     console.error('同步失败:', e);
     if (brandsData.length === 0) {
@@ -169,7 +171,10 @@ function renderMenu() {
     const menu = document.getElementById('dropdown-menu');
     if (isInCalcPage) {
         menu.innerHTML = `
-            <div class="menu-item" onclick="handleSync()">🔄 同步</div>
+            <div class="menu-item" onclick="handleSync()">
+    🔄 同步
+    <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
+</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
             <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
@@ -179,7 +184,10 @@ function renderMenu() {
             <div class="menu-item" onclick="showAddBrandDialog()">+ 增加品牌</div>
             <div class="menu-item" onclick="showAddSpecDialog()">+ 增加规格</div>
             <div class="divider"></div>
-            <div class="menu-item" onclick="handleSync()">🔄 同步</div>
+            <div class="menu-item" onclick="handleSync()">
+    🔄 同步
+    <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
+</div>
             <div class="divider"></div>
             <div class="menu-item" onclick="showLogDialog()">📋 日志</div>
             <div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>
@@ -223,7 +231,23 @@ async function checkAndSync() {
         await loadData();
     }
 }
-
+// ==================== 红点更新 ====================
+async function updateBadge() {
+    try {
+        const logs = await getAllLogs();
+        const hasChanges = logs.length > 0;
+        document.getElementById('menu-badge-dot').style.display = hasChanges ? 'block' : 'none';
+        const syncBadge = document.getElementById('sync-badge');
+        if (syncBadge) {
+            syncBadge.style.display = hasChanges ? 'inline-flex' : 'none';
+            if (hasChanges) syncBadge.textContent = logs.length;
+        }
+    } catch (e) {
+        document.getElementById('menu-badge-dot').style.display = 'none';
+        const syncBadge = document.getElementById('sync-badge');
+        if (syncBadge) syncBadge.style.display = 'none';
+    }
+}
 // ==================== 长按工具 ====================
 function bindLongPress(element, callback) {
     let timer;
@@ -297,6 +321,7 @@ async function editBrand(id) {
         renderBrands();
         if (selectedBrandId === id) {
             renderSpecs();
+            updateBadge();
         }
     }
     document.querySelector('.context-menu')?.remove();
@@ -331,6 +356,7 @@ async function deleteBrand(id) {
     if (selectedBrandId === id) selectedBrandId = null;
     renderBrands();
     renderSpecs();
+    updateBadge();
     document.querySelector('.context-menu')?.remove();
 }
 
@@ -374,6 +400,7 @@ async function showAddBrandDialog() {
         
         brandsData = await getAll('brands');
         renderBrands();
+        updateBadge();
     }
 }
 
@@ -547,6 +574,7 @@ async function editSpec(id) {
         
         specsData = await getAll('specs');
         renderSpecs();
+        updateBadge();
     }
     document.querySelector('.context-menu')?.remove();
 }
@@ -578,6 +606,7 @@ async function deleteSpec(id) {
     
     specsData = await getAll('specs');
     renderSpecs();
+    updateBadge();
     document.querySelector('.context-menu')?.remove();
 }
 
@@ -625,6 +654,7 @@ async function showAddSpecDialog() {
         
         specsData = await getAll('specs');
         renderSpecs();
+        updateBadge();
     }
 }
 
