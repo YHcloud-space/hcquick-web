@@ -140,40 +140,47 @@ body {
 /* 输入行 */
 
 /* 将输入行改为 Grid 布局，强制同行且等号居中 */
+/* 输入行 - 手机端稳定三列等宽 */
 #input-row {
     display: grid;
-    grid-template-columns: 5fr 2fr 5fr;
+    grid-template-columns: 1fr auto 1fr;  /* 左右平分，等号自适应 */
     align-items: center;
-    gap: 12px;
+    gap: 8px;          /* 减小间距，避免窄屏溢出 */
     margin: 16px 0;
 }
 
-/* 左侧输入区：包含文字和输入框 */
+/* 左侧输入区 */
 .x-input-area {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: space-between;  /* 让左侧文字与输入框分开 */
     background: #FFFFFF;
     border: 1px solid #E5E5E5;
     border-radius: 8px;
-    padding: 0 12px;
+    padding: 0 8px;
     height: 50px;
+    min-width: 0;      /* 防止 flex 溢出 */
 }
 .x-input-area span {
     font-size: 14px;
     white-space: nowrap;
+    margin-right: 8px;
 }
 #input-x {
     flex: 1;
     border: none;
-    text-align: right;
+    text-align: center;   /* 光标居中 */
     font-size: 18px;
     outline: none;
+    min-width: 0;         /* 允许收缩 */
+    background: transparent;
 }
+/* 等号 - 不伸缩，居中 */
 .equal-sign {
     text-align: center;
     font-size: 24px;
     font-weight: bold;
+    white-space: nowrap;
 }
 
 /* 右侧结果区 */
@@ -187,6 +194,10 @@ body {
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
+    white-space: nowrap;
+    padding: 0 12px;      /* 内边距防止文字贴边 */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #material-grid {
