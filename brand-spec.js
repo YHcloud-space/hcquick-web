@@ -57,6 +57,7 @@ const specGrid = document.getElementById('spec-grid');
 const lineBtns = document.querySelectorAll('.line-btn');
 const menuBtn = document.getElementById('menu-btn');
 
+
 // ==================== 数据同步（带版本检查） ====================
 async function loadData() {
   try {
@@ -76,9 +77,23 @@ async function loadData() {
     const json = await dataResp.json();
     
     await openDB();
+    // 1. 备份本地所有备注
+    const oldSpecs = await getAll('specs');
+    const oldMaterials = await getAll('materials');
+    const specRemarks = {};
+    oldSpecs.forEach(s => { if (s.remark) specRemarks[s.id] = s.remark; });
+    const materialRemarks = {};
+    oldMaterials.forEach(m => { if (m.remark) materialRemarks[m.id] = { remark: m.remark, type: m.material_type }; });
+
+    // 2. 全量覆盖
     await clearAndPutAll('brands', json.brands || []);
     await clearAndPutAll('specs', json.specs || []);
     await clearAndPutAll('materials', json.material_config || []);
+
+    // 3. 恢复本地备注
+    await restoreRemarks(specRemarks, materialRemarks, json.material_config || []);
+
+    // 4. 更新版本号
     await putMeta('local_version', String(json.version || remoteVersion));
     
     brandsData = json.brands || [];
@@ -677,16 +692,52 @@ function showSyncConfirmDialog(logs) {
     overlay.style.display = 'flex';
 }
 
-document.getElementById('sync-confirm-cancel').addEventListener('click', () => {
-    document.getElementById('sync-confirm-overlay').style.display = 'none';
-});
-
 document.getElementById('sync-confirm-ok').addEventListener('click', async () => {
     document.getElementById('sync-confirm-overlay').style.display = 'none';
-    await loadData();
-    location.reload(); // 强制刷新，应用新数据
+    await forceSyncAndReload(); // 关键修改
 });
 
+
+async function forceSyncAndReload() {
+    try {
+        // 直接下载完整 JSON，跳过版本检查
+        const dataResp = await fetch('https://data.cloudgj.cn/hcquick_data.json');
+        if (!dataResp.ok) throw new Error('数据下载失败');
+        const json = await dataResp.json();
+        
+        await openDB();
+        // 1. 备份本地所有备注
+        const oldSpecs = await getAll('specs');
+        const oldMaterials = await getAll('materials');
+        const specRemarks = {};
+        oldSpecs.forEach(s => { if (s.remark) specRemarks[s.id] = s.remark; });
+        const materialRemarks = {};
+        oldMaterials.forEach(m => { if (m.remark) materialRemarks[m.id] = { remark: m.remark, type: m.material_type }; });
+
+        // 2. 全量覆盖 IndexedDB
+        await clearAndPutAll('brands', json.brands || []);
+        await clearAndPutAll('specs', json.specs || []);
+        await clearAndPutAll('materials', json.material_config || []);
+
+        // 3. 恢复本地备注
+        await restoreRemarks(specRemarks, materialRemarks, json.material_config || []);
+
+        // 4. 更新版本号
+        const verResp = await fetch('https://data.cloudgj.cn/version.txt');
+        if (verResp.ok) {
+            const remoteVersion = parseInt((await verResp.text()).trim());
+            await putMeta('local_version', String(json.version || remoteVersion));
+        } else if (json.version) {
+            await putMeta('local_version', String(json.version));
+        }
+        
+        // 重启页面，加载最新数据
+        location.reload();
+    } catch (e) {
+        console.error('强制同步失败:', e);
+        alert('强制同步失败，请检查网络后重试');
+    }
+}
 // ==================== 启动 ====================
 (async () => {
     await openDB();
@@ -710,3 +761,59 @@ document.getElementById('sync-confirm-ok').addEventListener('click', async () =>
         updateBadge();
     }
 })();
+// ==================== 备注恢复 ====================
+async function restoreRemarks(specRemarks, materialRemarks, newMaterials) {
+    // 1. 恢复规格备注：始终保留本地
+    for (const [id, remark] of Object.entries(specRemarks)) {
+        const tx = db.transaction('specs', 'readwrite');
+        const store = tx.objectStore('specs');
+        const spec = await new Promise(resolve => {
+            const req = store.get(parseInt(id));
+            req.onsuccess = () => resolve(req.result);
+        });
+        if (spec) {
+            spec.remark = remark;
+            store.put(spec);
+        }
+        await new Promise(r => { tx.oncomplete = r; });
+    }
+
+    // 2. 恢复材料备注
+    for (const [id, data] of Object.entries(materialRemarks)) {
+        const materialType = data.type;
+        const localRemark = data.remark;
+
+        if (materialType === 'BOTTLE' || materialType === 'PUMP_CAP') {
+            // 非标签类：始终恢复本地备注
+            const tx = db.transaction('materials', 'readwrite');
+            const store = tx.objectStore('materials');
+            const mat = await new Promise(resolve => {
+                const req = store.get(parseInt(id));
+                req.onsuccess = () => resolve(req.result);
+            });
+            if (mat) {
+                mat.remark = localRemark;
+                store.put(mat);
+            }
+            await new Promise(r => { tx.oncomplete = r; });
+        } else if (materialType === 'LABEL' || materialType === 'PROMO_TAG') {
+            // 标签类：检查官方是否有非空备注
+            const newMat = newMaterials.find(m => m.id === parseInt(id));
+            if (newMat && (!newMat.remark || newMat.remark.trim() === '')) {
+                // 官方无备注或为空，恢复本地备注
+                const tx = db.transaction('materials', 'readwrite');
+                const store = tx.objectStore('materials');
+                const mat = await new Promise(resolve => {
+                    const req = store.get(parseInt(id));
+                    req.onsuccess = () => resolve(req.result);
+                });
+                if (mat) {
+                    mat.remark = localRemark;
+                    store.put(mat);
+                }
+                await new Promise(r => { tx.oncomplete = r; });
+            }
+            // 官方有非空备注：不恢复，保持官方备注
+        }
+    }
+}
