@@ -263,7 +263,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 36px;
+    min-height: 32px;
     color: #333333;               /* ← 未选中时的文字颜色（深灰/黑） */
 }
 
