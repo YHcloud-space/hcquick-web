@@ -352,14 +352,17 @@ body {
     background: #FFFFFF;
     border: none;
     border-radius: 8px;
-    flex-shrink: 0;        /* 禁止被压缩或拉伸 */
-    height: 35px;
+    height: 56px;            /* 固定高度 */
+    min-height: 56px;        /* 禁止缩小 */
+    max-height: 56px;        /* 禁止放大 */
+    flex-shrink: 0;          /* 禁止弹性伸缩 */
     font-size: 16px;
     font-weight: 400;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: auto;        /* 仍然推到底部 */
 }
 #promo-dialog-title {
     font-size: 16px;
@@ -370,8 +373,10 @@ body {
 }
 #promo-search {
     width: 100%;
-    flex-shrink: 0;        /* 禁止被压缩或拉伸 */
-    height: 56px;
+    height: 56px;            /* 高度固定 */
+    min-height: 56px;        /* 禁止缩小 */
+    max-height: 56px;        /* 禁止放大 */
+    flex-shrink: 0;          /* 禁止弹性伸缩 */
     border: 1px solid #E5E5E5;
     border-radius: 8px;
     text-align: center;
