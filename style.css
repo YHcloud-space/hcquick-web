@@ -236,21 +236,29 @@ body {
 }
 
 
-/* 促销标签卡片 */
+/* 促销标签卡片 — 默认（未选中）状态 */
 #promo-card {
     border: 1px solid #E5E5E5;
     border-radius: 10px;
     padding: 10px;
     text-align: center;
     font-size: 16px;
-    color: #1565C0;               /* 【新增】字体变深蓝色 */
     cursor: pointer;
     margin-bottom: 12px;
-    background: #FAFAFA;           /* 新增浅灰背景 */
-    display: flex;                 /* 新增 */
-    align-items: center;           /* 新增：垂直居中 */
-    justify-content: center;       /* 新增：水平居中 */
-    min-height: 36px;              /* 新增：最小高度 */
+    background: #FAFAFA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    color: #333333;               /* ← 未选中时的文字颜色（深灰/黑） */
+}
+
+/* 促销标签卡片 — 选中状态 */
+#promo-card.active {
+    background: #BBDEFB;           /* 浅蓝背景 */
+    border-color: #64B5F6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    color: #1565C0;               /* ← 选中时的文字颜色（深蓝） */
 }
 
 #promo-card.active {
