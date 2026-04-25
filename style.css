@@ -226,16 +226,18 @@ body {
     text-overflow: ellipsis;
     position: relative;
 }
-/* 新增：右上角 "EA" 标签 */
 #result-box::after {
     content: "EA";
     position: absolute;
-    top: 4px;
-    right: 8px;
-    font-size: 12px;
-    color: #999;
-    font-weight: 400;            /* 不加粗，与数字区分 */
-    pointer-events: none;        /* 不干扰点击 */
+    top: -10px;
+    right: 10px;
+    background: #FFF0F5;          /* 与结果框背景色一致，遮挡边框 */
+    color: #757575;               /* 与 .x-label 颜色一致 */
+    font-size: 12px;              /* 与 .x-label 字号一致 */
+    font-weight: 400;
+    padding: 0 4px;
+    line-height: 1;
+    pointer-events: none;
 }
 
 #material-grid {
