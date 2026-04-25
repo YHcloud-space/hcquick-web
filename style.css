@@ -43,6 +43,7 @@ body {
     background: #E3F2FD;
     border-color: #90CAF9;
     color: #1565C0;
+    overflow: hidden;
 }
 
 /* 区域标题 */
@@ -74,6 +75,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 .grid-btn.selected {
     background: #E3F2FD;
@@ -266,6 +268,7 @@ body {
     justify-content: center;
     position: relative;
     transition: background 0.2s;
+    overflow: hidden;
 }
 .promo-tag-btn.selected {
     background: #BBDEFB;
@@ -364,6 +367,7 @@ body {
     cursor: pointer;
     display: flex;
     align-items: center;
+    overflow: hidden;
 }
 .menu-item:hover { background: #F5F5F5; }
 .divider { height: 1px; background: #E5E5E5; margin: 4px 0; }
@@ -398,14 +402,17 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 600;
-    min-width: 120px;
+    min-width: 100px;
+    max-width: 130px;
     display: none;
 }
 .context-item {
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 8px 14px;
+    font-size: 13px;
     cursor: pointer;
+    overflow: hidden;
 }
+.context-item:hover { background: #F5F5F5; }
 /* 禁止浏览器默认长按菜单 */
 .grid-btn,
 .promo-tag-btn,
@@ -419,6 +426,7 @@ body {
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
+    overflow: hidden;
 }
 
 /* 输入框正常可选中 */
