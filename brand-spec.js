@@ -103,6 +103,11 @@ function renderBrands() {
             selectedBrandId = parseInt(btn.dataset.brandId);
             renderBrands();
             renderSpecs();
+          const brand = brandsData.find(b => b.id === selectedBrandId);
+    if (brand) {
+        titleEl.textContent = `${currentLine}线-${brand.name}`;
+    }
+
         });
         
         bindLongPress(btn, () => {
