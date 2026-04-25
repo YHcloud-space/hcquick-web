@@ -20,8 +20,11 @@ body {
     font-weight: 500;
 }
 #title { flex: 1; text-align: center; }
-#menu-btn { font-size: 20px; cursor: pointer; }
-position: relative;  /* 新增 */
+#menu-btn {
+    font-size: 20px;
+    cursor: pointer;
+    position: relative;   // ← 放这里
+}
 #menu-badge {
     position: absolute;   /* 新增 */
     top: 2px;            /* 新增 */
@@ -135,11 +138,7 @@ position: relative;  /* 新增 */
     z-index: 200;
 }
 /* 输入行 */
-#input-row > span {
-    width: 20px;
-    text-align: center;
-    flex-shrink: 0;
-}
+
 #input-row > span {
     width: 20px;
     text-align: center;
@@ -176,7 +175,7 @@ position: relative;  /* 新增 */
     max-height: 144px;
     overflow-y: auto;
 }
-}
+
 
 /* 促销标签卡片 */
 #promo-card {
@@ -236,8 +235,6 @@ position: relative;  /* 新增 */
     background: rgba(0,0,0,0.4);
     z-index: 1000;
     display: flex;
-    align-items: center;
-    justify-content: center;
     align-items: flex-start;         /* 靠上显示，键盘弹出时不会遮挡关闭按钮 */
     padding-top: 10vh;               /* 顶部留一些空间 */
 }
@@ -458,4 +455,3 @@ input[type="text"] {
     -webkit-user-select: text;
     user-select: text;
 }
-.context-item:hover { background: #F5F5F5; }
