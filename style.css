@@ -116,8 +116,10 @@ body {
 #calc-page {
     position: absolute;
     top: 45px;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     bottom: 0;
     background: #FFFFFF;
     overflow-y: auto;
