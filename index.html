@@ -144,6 +144,11 @@
                     .catch(err => console.log('SW failed', err));
             });
         }
+        // 如果是通过 ?force-reload 访问的，清除参数并强制刷新
+    if (window.location.search.includes('force-reload')) {
+        history.replaceState(null, '', window.location.pathname);
+        location.reload(true);
+    }
     </script>
 </body>
 </html>
