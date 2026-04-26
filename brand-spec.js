@@ -692,6 +692,9 @@ document.getElementById('sync-confirm-ok').addEventListener('click', async () =>
     document.getElementById('sync-confirm-overlay').style.display = 'none';
     await forceSyncAndReload(); // 关键修改
 });
+document.getElementById('sync-confirm-cancel').addEventListener('click', () => {
+    document.getElementById('sync-confirm-overlay').style.display = 'none';
+});
 
 
 async function forceSyncAndReload() {
@@ -718,7 +721,8 @@ async function forceSyncAndReload() {
         // 3. 恢复本地备注
         await restoreRemarks(specRemarks, materialRemarks, json.material_config || []);
 
-        // 4. 更新版本号
+        
+                       // 4. 更新版本号
         const verResp = await fetch('https://data.cloudgj.cn/version.txt');
         if (verResp.ok) {
             const remoteVersion = parseInt((await verResp.text()).trim());
@@ -726,6 +730,9 @@ async function forceSyncAndReload() {
         } else if (json.version) {
             await putMeta('local_version', String(json.version));
         }
+        
+        // ✅ 清除所有本地修改日志
+        await clearAllLogs();
         
         // 重启页面，加载最新数据
         location.reload();
