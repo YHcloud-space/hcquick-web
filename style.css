@@ -280,7 +280,7 @@ body {
 #promo-card {
     border: 1px solid #E5E5E5;
     border-radius: 10px;
-    padding: 10px;
+    padding: 6px 10px;
     text-align: center;
     font-size: 16px;
     cursor: pointer;
@@ -289,7 +289,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 32px;
+    min-height: 28px;
     color: #333333;               /* ← 未选中时的文字颜色（深灰/黑） */
 }
 
