@@ -624,6 +624,7 @@ input[type="text"] {
     padding: 16px;
     display: flex;
     flex-direction: column;
+    align-items: center;      /* ✅ 新增：内部内容水平居中 */
     margin: 0 auto;        /* 新增：确保居中 */
 }
 #material-edit-title {
@@ -641,7 +642,7 @@ input[type="text"] {
     display: none;   /* 隐藏旧标签 */
 }
 .me-input {
-    flex: 1;
+    width: 100%;              /* ✅ 确保填满容器 */
     height: 36px;
     border: 1px solid #E5E5E5;
     border-radius: 6px;
