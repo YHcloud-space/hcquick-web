@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hcquick-v8';  // ✅ 版本号升级
+const CACHE_NAME = 'hcquick-v9';  // ✅ 版本号升级
 
 const urlsToCache = [
   '/',
@@ -29,7 +29,16 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
-  );
+    const url = new URL(event.request.url);
+    
+    // 如果 URL 中包含 ?force-reload，跳过缓存，直接走网络
+    if (url.searchParams.has('force-reload')) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+    
+    // 否则走缓存优先策略
+    event.respondWith(
+        caches.match(event.request).then(cached => cached || fetch(event.request))
+    );
 });
