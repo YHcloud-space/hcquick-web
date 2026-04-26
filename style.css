@@ -57,6 +57,11 @@ body {
     color: #111111;
     cursor: pointer;
     overflow: hidden;
+    position: relative;                    /* 为涟漪裁剪建立定位锚 */
+    -webkit-tap-highlight-color: transparent;  /* 消除移动端点击高亮 */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 .line-btn.selected {
     background: #E3F2FD;
@@ -315,7 +320,12 @@ body {
     background: #FFFFFF;
     font-size: 12px;
     cursor: pointer;
-    overflow: hidden;  
+    overflow: hidden;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 .sub-btn.selected {
     background: #E3F2FD;
