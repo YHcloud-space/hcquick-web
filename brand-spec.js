@@ -936,6 +936,7 @@ document.getElementById('log-viewer-close').addEventListener('click', () => {
 });
 // ==================== 启动 ====================
 (async () => {
+    currentLine = 'C';
     await openDB();
     const brands = await getAll('brands');
     if (brands.length > 0) {
