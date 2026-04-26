@@ -44,6 +44,11 @@ async function updateBadge() {
                 syncBadge.style.display = 'none';
             }
         }
+        const menuBadge = document.getElementById('menu-badge-dot');
+        if (menuBadge) {
+            menuBadge.style.display = hasLocalChanges ? 'inline' : 'none';
+        }
+    
     } catch (e) {
         const syncBadge = document.getElementById('sync-badge');
         const logBadge = document.getElementById('log-badge');
@@ -86,7 +91,7 @@ const menuBtn = document.getElementById('menu-btn');
 
 
 // ==================== 数据同步（带版本检查） ====================
-async function loadData() {
+async function loadData(forceUpdate = false) {
   try {
     const verResp = await fetch('https://data.cloudgj.cn/version.txt');
     if (!verResp.ok) throw new Error('版本检查失败');
@@ -95,13 +100,21 @@ async function loadData() {
     if (remoteVersion <= localVersion && brandsData.length > 0) {
       console.log('已经是最新版本:', localVersion);
       serverNewVersion = false;
-      await putMeta('server_new_version', 'false');  
+      await putMeta('server_new_version', 'false');
       return;
     }
     
     console.log(`发现新版本: ${remoteVersion} (本地: ${localVersion})`);
     serverNewVersion = true;
     await putMeta('server_new_version', 'true');
+    
+    // 如果不是强制更新 且 本地已有缓存 → 不下载，只更新红点
+    if (!forceUpdate && brandsData.length > 0) {
+      updateBadge();
+      return;
+    }
+    
+    // ========== 以下为强制更新/首次下载流程 ==========
     const dataResp = await fetch('https://data.cloudgj.cn/hcquick_data.json');
     if (!dataResp.ok) throw new Error('数据下载失败');
     const json = await dataResp.json();
@@ -146,7 +159,6 @@ async function loadData() {
     }
   }
 }
-
 // ==================== 品牌渲染 ====================
 function renderBrands() {
     const filtered = brandsData.filter(b => b.line_code === currentLine);
@@ -293,7 +305,7 @@ async function handleSync() {
     
     // 2. 无本地修改，直接进行数据更新
         const oldVersion = localVersion;
-    await loadData();
+    await loadData(true);
     if (localVersion > oldVersion) {
         serverNewVersion = false;
         await putMeta('server_new_version', 'false');
@@ -302,7 +314,7 @@ async function handleSync() {
         // 需确认：新版可能在启动时已检测到
         if (serverNewVersion) {
             if (confirm('发现新版本数据库，是否下载？')) {
-                await loadData();
+                await loadData(true);
                 serverNewVersion = false;
                 await putMeta('server_new_version', 'false');
                 location.reload();
@@ -319,12 +331,12 @@ async function checkAndSync() {
             showSyncConfirmDialog(logs);
         } else {
             // 正常情况下不会走到这里（handleSync已判断），但保留兜底
-            await loadData();
+            await loadData(true);
             location.reload();
         }
     } catch (e) {
         console.error('检查日志失败:', e);
-        await loadData();
+        await loadData(true);
         location.reload();
     }
 }
