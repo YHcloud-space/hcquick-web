@@ -768,3 +768,11 @@ input[type="text"] {
     pointer-events: none;
     white-space: nowrap;
 }
+/* 材料弹窗按钮 */
+#me-btn-cancel,
+#me-btn-save {
+    flex: 1;
+    height: 40px;
+    font-size: 15px;
+    border-radius: 8px;
+}
