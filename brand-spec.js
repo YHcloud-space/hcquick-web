@@ -443,47 +443,47 @@ async function deleteBrand(id) {
 async function showAddBrandDialog() {
     menuVisible = false;
     document.getElementById('dropdown-menu').style.display = 'none';
-    const name = prompt('请输入新品牌名称（1-15字符）：');
-    if (name && name.trim() !== '') {
+
+    showFormEditor('新增品牌', [
+        { label: '品牌名称', key: 'name', value: '', type: 'text', required: true }
+    ], async (values) => {
         await openDB();
+        const all = await getAll('brands');
+        const maxId = all.reduce((max, b) => Math.max(max, b.id || 0), 0);
         const newBrand = {
+            id: maxId + 1,
             line_code: currentLine,
-            name: name.trim(),
+            name: values.name,
             sort_order: 0,
             created_at: Math.floor(Date.now() / 1000),
             updated_at: Math.floor(Date.now() / 1000)
         };
-        const all = await getAll('brands');
-        const maxId = all.reduce((max, b) => Math.max(max, b.id || 0), 0);
-        newBrand.id = maxId + 1;
-        
+
         const tx = db.transaction('brands', 'readwrite');
         const store = tx.objectStore('brands');
         await new Promise((resolve, reject) => {
-            const request = store.add(newBrand);
-            request.onsuccess = resolve;
-            request.onerror = reject;
+            const req = store.add(newBrand);
+            req.onsuccess = resolve;
+            req.onerror = reject;
         });
-        
-        const logData = {
-            type: 'INSERT',
-            table: 'brands',
-            path: `${currentLine} 线 > ${newBrand.name}`,
-            data: newBrand
-        };
+
         await addLog({
             operation_type: 'INSERT',
             table_name: 'brands',
-            data_json: JSON.stringify(logData),
+            data_json: JSON.stringify({
+                type: 'INSERT',
+                table: 'brands',
+                path: `${currentLine} 线 > ${newBrand.name}`,
+                data: newBrand
+            }),
             created_at: Math.floor(Date.now() / 1000)
         });
-        
+
         brandsData = await getAll('brands');
         renderBrands();
         updateBadge();
-    }
+    });
 }
-
 // ==================== 设置对话框 ====================
 async function showSettingsDialog() {
     menuVisible = false;
@@ -792,8 +792,11 @@ async function showAddSpecDialog() {
         alert('请先选择一个品牌');
         return;
     }
-    const sort = prompt('请输入规格数字：');
-    if (sort && !isNaN(parseInt(sort))) {
+
+    showFormEditor('新增规格', [
+        { label: '规格数字', key: 'sort', value: '', type: 'number', required: true },
+        { label: '备注', key: 'remark', value: '', type: 'text', required: false }
+    ], async (values) => {
         await openDB();
         const all = await getAll('specs');
         const maxId = all.reduce((max, s) => Math.max(max, s.id || 0), 0);
@@ -801,34 +804,37 @@ async function showAddSpecDialog() {
         const newSpec = {
             id: maxId + 1,
             brand_id: selectedBrandId,
-            name: `${brand.name} ${sort}`,
-            sort_number: parseInt(sort),
+            name: `${brand.name} ${values.sort}`,
+            sort_number: values.sort,
+            remark: values.remark,
             created_at: Math.floor(Date.now() / 1000),
             updated_at: Math.floor(Date.now() / 1000)
         };
+
         const tx = db.transaction('specs', 'readwrite');
         const store = tx.objectStore('specs');
         await new Promise((resolve, reject) => {
-            const request = store.add(newSpec);
-            request.onsuccess = resolve;
-            request.onerror = reject;
+            const req = store.add(newSpec);
+            req.onsuccess = resolve;
+            req.onerror = reject;
         });
-        const logData = {
-            type: 'INSERT',
-            table: 'specs',
-            path: `${currentLine} 线 > ${brand.name} > ${newSpec.name}`,
-            data: newSpec
-        };
+
         await addLog({
             operation_type: 'INSERT',
             table_name: 'specs',
-            data_json: JSON.stringify(logData),
+            data_json: JSON.stringify({
+                type: 'INSERT',
+                table: 'specs',
+                path: `${currentLine} 线 > ${brand.name} > ${newSpec.name}`,
+                data: newSpec
+            }),
             created_at: Math.floor(Date.now() / 1000)
         });
+
         specsData = await getAll('specs');
         renderSpecs();
         updateBadge();
-    }
+    });
 }
 
 // ==================== 同步确认弹窗 ====================
