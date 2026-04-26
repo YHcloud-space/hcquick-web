@@ -778,3 +778,4 @@ async function addPromoTagMaterial() {
     document.getElementById('dropdown-menu').style.display = 'none';
     menuVisible = false;
 }
+}
