@@ -633,17 +633,11 @@ input[type="text"] {
     color: #333;
 }
 .me-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    display: block;
+    margin-bottom: 14px;   /* 稍大一点，给浮动标签留空间 */
 }
 .me-label {
-    width: 140px;
-    font-size: 13px;
-    color: #555;
-    text-align: right;
-    flex-shrink: 0;
+    display: none;   /* 隐藏旧标签 */
 }
 .me-input {
     flex: 1;
@@ -752,4 +746,23 @@ input[type="text"] {
     box-sizing: border-box;
     align-items: center;
     justify-content: center;
+}
+/* 输入框容器 — 相对定位锚点 */
+.me-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+/* 浮动标签 — 仿 X(kg) 效果 */
+.me-label-float {
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    background: #FFFFFF;
+    padding: 0 6px;
+    font-size: 12px;
+    color: #757575;
+    z-index: 1;
+    pointer-events: none;
+    white-space: nowrap;
 }
