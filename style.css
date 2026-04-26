@@ -605,3 +605,57 @@ input[type="text"] {
     -webkit-user-select: text;
     user-select: text;
 }
+/* 材料编辑弹窗 */
+#material-edit-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1002;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10vh;
+    justify-content: center;
+}
+#material-edit-dialog {
+    background: #FFFFFF;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 420px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+#material-edit-title {
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 12px;
+    color: #333;
+}
+.me-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.me-label {
+    width: 140px;
+    font-size: 13px;
+    color: #555;
+    text-align: right;
+    flex-shrink: 0;
+}
+.me-input {
+    flex: 1;
+    height: 36px;
+    border: 1px solid #E5E5E5;
+    border-radius: 6px;
+    padding: 0 8px;
+    font-size: 14px;
+    background: #FAFAFA;
+    outline: none;
+}
+.me-input:focus {
+    border-color: #64B5F6;
+    background: #FFFFFF;
+}
