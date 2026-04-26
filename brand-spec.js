@@ -557,38 +557,62 @@ function showSpecContextMenu(spec, element) {
 
 async function editSpec(id) {
     const spec = specsData.find(s => s.id === id);
-    const newSort = prompt('编辑规格数字：', spec.sort_number);
-    if (newSort && !isNaN(parseInt(newSort))) {
-        await openDB();
-        const updated = {
-            ...spec,
-            sort_number: parseInt(newSort),
-            name: `${brandsData.find(b => b.id === spec.brand_id)?.name} ${newSort}`,
-            updated_at: Math.floor(Date.now() / 1000)
-        };
-        const tx = db.transaction('specs', 'readwrite');
-        const store = tx.objectStore('specs');
-        await new Promise((resolve, reject) => {
-            const request = store.put(updated);
-            request.onsuccess = resolve;
-            request.onerror = reject;
-        });
-        const logData = {
-            type: 'UPDATE',
-            table: 'specs',
-            path: `${currentLine} 线 > ${brandsData.find(b => b.id === spec.brand_id)?.name} > ${spec.name}`,
-            changes: { '排序': { old: spec.sort_number, new: updated.sort_number } }
-        };
-        await addLog({
-            operation_type: 'UPDATE',
-            table_name: 'specs',
-            data_json: JSON.stringify(logData),
-            created_at: Math.floor(Date.now() / 1000)
-        });
-        specsData = await getAll('specs');
-        renderSpecs();
-        updateBadge();
+    const brandName = brandsData.find(b => b.id === spec.brand_id)?.name || '';
+    
+    // 第一步：编辑规格数字（限定4位）
+    const newSort = prompt('编辑规格数字（1-4位）：', spec.sort_number);
+    if (!newSort || isNaN(parseInt(newSort))) {
+        document.querySelector('.context-menu')?.remove();
+        return;
     }
+    const sortNum = parseInt(newSort);
+    if (sortNum < 1 || sortNum > 9999) {
+        alert('规格数字需为1-4位正整数');
+        document.querySelector('.context-menu')?.remove();
+        return;
+    }
+    
+    // 第二步：编辑备注
+    const newRemark = prompt('编辑规格备注（可为空）：', spec.remark || '');
+    if (newRemark === null) {
+        document.querySelector('.context-menu')?.remove();
+        return;
+    }
+    
+    await openDB();
+    const updated = {
+        ...spec,
+        sort_number: sortNum,
+        name: `${brandName} ${sortNum}`,
+        remark: newRemark.trim(),
+        updated_at: Math.floor(Date.now() / 1000)
+    };
+    
+    const tx = db.transaction('specs', 'readwrite');
+    const store = tx.objectStore('specs');
+    await new Promise((resolve, reject) => {
+        const request = store.put(updated);
+        request.onsuccess = resolve;
+        request.onerror = reject;
+    });
+    
+    // 日志：只记录排序变更，备注绝对不出现在日志中
+    const logData = {
+        type: 'UPDATE',
+        table: 'specs',
+        path: `${currentLine} 线 > ${brandName} > ${spec.name}`,
+        changes: { '排序': { old: spec.sort_number, new: sortNum } }
+    };
+    await addLog({
+        operation_type: 'UPDATE',
+        table_name: 'specs',
+        data_json: JSON.stringify(logData),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    
+    specsData = await getAll('specs');
+    renderSpecs();
+    updateBadge();
     document.querySelector('.context-menu')?.remove();
 }
 
