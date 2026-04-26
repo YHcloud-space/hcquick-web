@@ -137,6 +137,8 @@ function showMaterialContextMenu(mat, element) {
 async function editMaterial(id) {
     const mat = materialsData.find(m => m.id === id);
     if (!mat) return;
+    openMaterialEditor(mat.material_type, mat);
+}
     
     const spec = specsData.find(s => s.id === mat.spec_id);
     const brand = brandsData.find(b => b.id === spec?.brand_id);
@@ -240,7 +242,7 @@ async function editMaterial(id) {
     updateCalcUI();
     updateBadge();
     document.querySelector('.context-menu')?.remove();
-}
+
 
 // ==================== 材料删除 ====================
 async function deleteMaterial(id) {
@@ -775,3 +777,199 @@ async function addPromoTagMaterial() {
     document.getElementById('dropdown-menu').style.display = 'none';
     menuVisible = false;
 }
+// ==================== 材料编辑器状态 ====================
+let materialEditMode = 'add';       // 'add' | 'edit'
+let materialEditType = 'BOTTLE';    // 'BOTTLE' | 'PUMP_CAP' | 'LABEL' | 'PROMO_TAG'
+let materialEditId = null;          // 编辑时存 id，新增时为 null    
+    // ==================== 打开材料编辑器 ====================
+function openMaterialEditor(type, matData = null) {
+    materialEditType = type;
+    
+    if (matData) {
+        materialEditMode = 'edit';
+        materialEditId = matData.id;
+        document.getElementById('material-edit-title').textContent = '编辑材料';
+        document.getElementById('me-name').value = matData.custom_name || '';
+        document.getElementById('me-code').value = matData.m_code || '';
+        document.getElementById('me-p1').value = matData.p1 ?? '';
+        document.getElementById('me-t1').value = matData.t1 ?? '';
+        document.getElementById('me-t2').value = matData.t2 ?? '';
+        document.getElementById('me-m').value = matData.m ?? '';
+        document.getElementById('me-c').value = matData.c ?? '';
+        document.getElementById('me-q').value = matData.q ?? '';
+        document.getElementById('me-remark').value = matData.remark || '';
+    } else {
+        materialEditMode = 'add';
+        materialEditId = null;
+        document.getElementById('material-edit-title').textContent = '新增材料';
+        document.getElementById('me-name').value = '';
+        document.getElementById('me-code').value = '';
+        document.getElementById('me-p1').value = '';
+        document.getElementById('me-t1').value = '';
+        document.getElementById('me-t2').value = '';
+        document.getElementById('me-m').value = '';
+        document.getElementById('me-c').value = '';
+        document.getElementById('me-q').value = '';
+        document.getElementById('me-remark').value = '';
+    }
+    
+    // 显隐字段
+    document.getElementById('me-row-name').style.display = (type === 'PROMO_TAG') ? 'none' : 'flex';
+    document.getElementById('me-row-code').style.display = (type === 'PROMO_TAG') ? 'flex' : 'none';
+    document.getElementById('me-row-p1').style.display = (type === 'BOTTLE' || type === 'PUMP_CAP') ? 'flex' : 'none';
+    document.getElementById('me-row-t1').style.display = (type === 'PUMP_CAP') ? 'flex' : 'none';
+    document.getElementById('me-row-t2').style.display = (type === 'PUMP_CAP') ? 'flex' : 'none';
+    document.getElementById('me-row-m').style.display = (type === 'LABEL' || type === 'PROMO_TAG') ? 'flex' : 'none';
+    document.getElementById('me-row-c').style.display = (type === 'LABEL' || type === 'PROMO_TAG') ? 'flex' : 'none';
+    document.getElementById('me-row-q').style.display = (type === 'LABEL' || type === 'PROMO_TAG') ? 'flex' : 'none';
+    document.getElementById('me-row-remark').style.display = 'flex';
+    
+    document.getElementById('material-edit-overlay').style.display = 'flex';
+    document.getElementById('dropdown-menu').style.display = 'none';
+    menuVisible = false;
+}
+    document.getElementById('me-btn-cancel').addEventListener('click', () => {
+    document.getElementById('material-edit-overlay').style.display = 'none';
+});
+    document.getElementById('me-btn-save').addEventListener('click', async () => {
+    const type = materialEditType;
+    
+    // 收集并校验字段
+    let name = '', code = '', p1, t1, t2, m, c, q, remark = '';
+    remark = document.getElementById('me-remark').value.trim();
+    
+    if (type === 'BOTTLE') {
+        name = document.getElementById('me-name').value.trim();
+        if (!name) { alert('名称不能为空'); return; }
+        const p1Raw = document.getElementById('me-p1').value;
+        const p1Check = validateNumber(p1Raw, 'P1');
+        if (!p1Check.valid) { alert(p1Check.error); return; }
+        p1 = p1Check.value;
+    } else if (type === 'PUMP_CAP') {
+        name = document.getElementById('me-name').value.trim();
+        if (!name) { alert('名称不能为空'); return; }
+        const p1Raw = document.getElementById('me-p1').value;
+        const p1Check = validateNumber(p1Raw, 'P1');
+        if (!p1Check.valid) { alert(p1Check.error); return; }
+        p1 = p1Check.value;
+        const t1Raw = document.getElementById('me-t1').value;
+        const t1Check = validateNumber(t1Raw, 'T1');
+        if (!t1Check.valid) { alert(t1Check.error); return; }
+        t1 = t1Check.value;
+        const t2Raw = document.getElementById('me-t2').value;
+        const t2Check = validateNumber(t2Raw, 'T2');
+        if (!t2Check.valid) { alert(t2Check.error); return; }
+        t2 = t2Check.value;
+    } else if (type === 'LABEL') {
+        name = document.getElementById('me-name').value.trim();
+        if (!name) { alert('名称不能为空'); return; }
+        const mRaw = document.getElementById('me-m').value;
+        const mCheck = validateNumber(mRaw, 'M');
+        if (!mCheck.valid) { alert(mCheck.error); return; }
+        m = mCheck.value;
+        const cRaw = document.getElementById('me-c').value;
+        const cCheck = validateNumber(cRaw, 'C');
+        if (!cCheck.valid) { alert(cCheck.error); return; }
+        c = cCheck.value;
+        const qRaw = document.getElementById('me-q').value;
+        const qCheck = validateInt(qRaw, 'Q');
+        if (!qCheck.valid) { alert(qCheck.error); return; }
+        q = qCheck.value;
+    } else if (type === 'PROMO_TAG') {
+        code = document.getElementById('me-code').value.trim();
+        if (!code) { alert('标签CODE不能为空'); return; }
+        if (!/^\d+$/.test(code)) { alert('标签CODE必须为纯数字'); return; }
+        const mRaw = document.getElementById('me-m').value;
+        const mCheck = validateNumber(mRaw, 'M');
+        if (!mCheck.valid) { alert(mCheck.error); return; }
+        m = mCheck.value;
+        const cRaw = document.getElementById('me-c').value;
+        const cCheck = validateNumber(cRaw, 'C');
+        if (!cCheck.valid) { alert(cCheck.error); return; }
+        c = cCheck.value;
+        const qRaw = document.getElementById('me-q').value;
+        const qCheck = validateInt(qRaw, 'Q');
+        if (!qCheck.valid) { alert(qCheck.error); return; }
+        q = qCheck.value;
+    }
+    
+    // 构建 mat 对象
+    const matObj = {
+        spec_id: selectedSpecId,
+        material_type: type,
+        custom_name: name || `促销 ${code}`,
+        remark: remark,
+        updated_at: Math.floor(Date.now() / 1000)
+    };
+    if (type === 'BOTTLE') matObj.p1 = p1;
+    if (type === 'PUMP_CAP') { matObj.p1 = p1; matObj.t1 = t1; matObj.t2 = t2; }
+    if (type === 'LABEL') { matObj.m = m; matObj.c = c; matObj.q = q; }
+    if (type === 'PROMO_TAG') { matObj.m_code = code; matObj.m = m; matObj.c = c; matObj.q = q; }
+    
+    
+    
+    await openDB();
+    
+    if (materialEditMode === 'add') {
+        // 新增
+        const all = await getAll('materials');
+        const maxId = all.reduce((max, m) => Math.max(max, m.id || 0), 0);
+        matObj.id = maxId + 1;
+        matObj.created_at = Math.floor(Date.now() / 1000);
+        
+        const tx = db.transaction('materials', 'readwrite');
+        const store = tx.objectStore('materials');
+        await new Promise((resolve, reject) => { const req = store.add(matObj); req.onsuccess = resolve; req.onerror = reject; });
+        
+        const logData = { type: 'INSERT', table: 'materials', path: basePath, data: {} };
+        if (type === 'BOTTLE') logData.data = { p1: p1 };
+        else if (type === 'PUMP_CAP') logData.data = { p1, t1, t2 };
+        else if (type === 'LABEL') logData.data = { m, c, q };
+        else logData.data = { m_code: code, m, c, q };
+        
+        await addLog({ operation_type: 'INSERT', table_name: 'materials',
+            data_json: JSON.stringify(logData), created_at: Math.floor(Date.now()/1000) });
+    } else {
+        // 编辑
+        const oldMat = materialsData.find(m => m.id === materialEditId);
+        const changes = {};
+        if (type === 'BOTTLE' && oldMat.p1 !== p1) changes.p1 = { old: oldMat.p1, new: p1 };
+        if (type === 'PUMP_CAP') {
+            if (oldMat.p1 !== p1) changes.p1 = { old: oldMat.p1, new: p1 };
+            if (oldMat.t1 !== t1) changes.t1 = { old: oldMat.t1, new: t1 };
+            if (oldMat.t2 !== t2) changes.t2 = { old: oldMat.t2, new: t2 };
+        }
+        if (type === 'LABEL') {
+            if (oldMat.m !== m) changes.m = { old: oldMat.m, new: m };
+            if (oldMat.c !== c) changes.c = { old: oldMat.c, new: c };
+            if (oldMat.q !== q) changes.q = { old: oldMat.q, new: q };
+        }
+        if (type === 'PROMO_TAG') {
+            if (oldMat.m_code !== code) changes.m_code = { old: oldMat.m_code, new: code };
+            if (oldMat.m !== m) changes.m = { old: oldMat.m, new: m };
+            if (oldMat.c !== c) changes.c = { old: oldMat.c, new: c };
+            if (oldMat.q !== q) changes.q = { old: oldMat.q, new: q };
+        }
+        
+        const updated = { ...oldMat, ...matObj, id: materialEditId };
+        const tx = db.transaction('materials', 'readwrite');
+        const store = tx.objectStore('materials');
+        await new Promise((resolve, reject) => { const req = store.put(updated); req.onsuccess = resolve; req.onerror = reject; });
+        
+        if (Object.keys(changes).length > 0) {
+            await addLog({ operation_type: 'UPDATE', table_name: 'materials',
+                data_json: JSON.stringify({ type: 'UPDATE', table: 'materials', path: basePath, changes }),
+                created_at: Math.floor(Date.now()/1000) });
+        }
+    }
+    
+    document.getElementById('material-edit-overlay').style.display = 'none';
+    materialsData = await getAll('materials');
+    renderMaterials();
+    updateCalcUI();
+    updateBadge();
+});
+    function addBottleMaterial() { openMaterialEditor('BOTTLE'); }
+function addPumpCapMaterial() { openMaterialEditor('PUMP_CAP'); }
+function addLabelMaterial() { openMaterialEditor('LABEL'); }
+function addPromoTagMaterial() { openMaterialEditor('PROMO_TAG'); }
