@@ -198,24 +198,24 @@ function renderMenu() {
     const syncHTML = `
         <div class="menu-item" onclick="handleSync()">
             🔄 同步
-            <span id="sync-badge" style="display:none;background:#E53935;color:#fff;border-radius:50%;min-width:18px;height:18px;text-align:center;line-height:18px;font-size:10px;margin-left:8px;">1</span>
+            <span id="sync-badge" style="display:none;">1</span>
         </div>`;
     const logHTML = `<div class="menu-item" onclick="showLogDialog()">📋 日志</div>`;
     const settingsHTML = `<div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>`;
     if (isInCalcPage) {
-        menu.innerHTML = syncHTML + `<div class="divider"></div>` + logHTML + settingsHTML;
-    } else {
-        menu.innerHTML = `
-            <div class="menu-item" onclick="showAddBrandDialog()">+ 增加品牌</div>
-            <div class="menu-item" onclick="showAddSpecDialog()">+ 增加规格</div>
-            <div class="divider"></div>
-            ${syncHTML}
-            <div class="divider"></div>
-            ${logHTML}
-            ${settingsHTML}
-        `;
-    }
+    menu.innerHTML = `
+        <div class="menu-item" onclick="addBottleMaterial()">+ 增加瓶子类</div>
+        <div class="menu-item" onclick="addPumpCapMaterial()">+ 增加泵盖类</div>
+        <div class="menu-item" onclick="addLabelMaterial()">+ 增加标签类</div>
+        <div class="menu-item" onclick="addPromoTagMaterial()">+ 增加促销标签类</div>
+        <div class="divider"></div>
+        ${syncHTML}
+        <div class="divider"></div>
+        ${logHTML}
+        ${settingsHTML}
+    `;
 }
+
 
 menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
