@@ -113,15 +113,33 @@ function updateCalcUI() {
     
     if (active.material_type === 'PUMP_CAP') {
         subOptions.innerHTML = `
-            <button class="sub-btn ${peelMode === 'NONE' ? 'selected' : ''}" onclick="setPeel('NONE')">无</button>
-            <button class="sub-btn ${peelMode === 'CARTON' ? 'selected' : ''}" onclick="setPeel('CARTON')">纸箱去皮</button>
-            <button class="sub-btn ${peelMode === 'PLASTIC' ? 'selected' : ''}" onclick="setPeel('PLASTIC')">胶箱去皮</button>
+    <button class="sub-btn ${peelMode === 'NONE' ? 'selected' : ''}"
+        onmousedown="event.preventDefault()"
+        ontouchstart="event.preventDefault()"
+        onclick="setPeel('NONE')">无</button>
+    <button class="sub-btn ${peelMode === 'CARTON' ? 'selected' : ''}"
+        onmousedown="event.preventDefault()"
+        ontouchstart="event.preventDefault()"
+        onclick="setPeel('CARTON')">纸箱去皮</button>
+    <button class="sub-btn ${peelMode === 'PLASTIC' ? 'selected' : ''}"
+        onmousedown="event.preventDefault()"
+        ontouchstart="event.preventDefault()"
+        onclick="setPeel('PLASTIC')">胶箱去皮</button>
         `;
     } else if (['LABEL', 'PROMO_TAG'].includes(active.material_type)) {
         subOptions.innerHTML = `
-            <button class="sub-btn ${rollCount === 1 ? 'selected' : ''}" onclick="setRoll(1)">1 卷</button>
-            <button class="sub-btn ${rollCount === 2 ? 'selected' : ''}" onclick="setRoll(2)">2 卷</button>
-            <button class="sub-btn ${rollCount === 3 ? 'selected' : ''}" onclick="setRoll(3)">3 卷</button>
+   <button class="sub-btn ${rollCount === 1 ? 'selected' : ''}"
+        onmousedown="event.preventDefault()"
+        ontouchstart="event.preventDefault()"
+        onclick="setRoll(1)">1 卷</button>
+  <button class="sub-btn ${rollCount === 2 ? 'selected' : ''}"
+        onmousedown="event.preventDefault()"
+        ontouchstart="event.preventDefault()"
+        onclick="setRoll(2)">2 卷</button>
+  <button class="sub-btn ${rollCount === 3 ? 'selected' : ''}"
+        onmousedown="event.preventDefault()"
+        ontouchstart="event.preventDefault()"
+        onclick="setRoll(3)">3 卷</button>
         `;
     } else {
         subOptions.innerHTML = '';
@@ -131,7 +149,10 @@ function updateCalcUI() {
         subOptions.innerHTML = `
             <div style="display:flex;align-items:center;gap:8px;width:100%;background:#F5F5F5;padding:8px;border-radius:8px;">
                 <span style="font-size:12px;color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bottleAccum.expression || '—'}</span>
-                <button class="sub-btn" onclick="bottleTotal()">Total</button>
+                <button class="sub-btn"
+        onmousedown="event.preventDefault()"
+        ontouchstart="event.preventDefault()"
+        onclick="bottleTotal()">Total</button>
                 <span style="background:#FFF0F5;padding:4px 8px;border-radius:8px;font-weight:bold;color:#1565C0;">${bottleAccum.totalEA.toFixed(1)}</span>
             </div>
         `;
@@ -215,6 +236,7 @@ function bottleTotal() {
         inputX.value = '';
         resultBox.textContent = '0.0';
         updateCalcUI();
+        inputX.focus();
     }
 }
 
