@@ -85,7 +85,7 @@ function renderMaterials() {
         </button>
     `).join('');
     
-    materialGrid.querySelectorAll('.grid-btn').forEach(btn => {
+        materialGrid.querySelectorAll('.grid-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             selectedMaterial = materialsData.find(m => m.id === parseInt(btn.dataset.matId));
             selectedPromoTag = null;
@@ -97,10 +97,182 @@ function renderMaterials() {
             updateCalcUI();
             inputX.focus();
         });
+        
+        // ✅ 新增长按事件
+        bindLongPress(btn, () => {
+            const mat = materialsData.find(m => m.id === parseInt(btn.dataset.matId));
+            showMaterialContextMenu(mat, btn);
+        });
     });
+
+// ==================== 材料上下文菜单 ====================
+function showMaterialContextMenu(mat, element) {
+    document.querySelector('.context-menu')?.remove();
+    
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+    menu.innerHTML = `
+        <div class="context-item" onclick="editMaterial(${mat.id})">编辑</div>
+        <div class="divider"></div>
+        <div class="context-item" style="color:#E53935;" onclick="deleteMaterial(${mat.id})">删除</div>
+    `;
+    document.body.appendChild(menu);
+    
+    const rect = element.getBoundingClientRect();
+    menu.style.left = rect.left + 'px';
+    menu.style.top = rect.bottom + 4 + 'px';
+    menu.style.display = 'block';
+    
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 100);
 }
-
-
+    // ==================== 材料编辑 ====================
+async function editMaterial(id) {
+    const mat = materialsData.find(m => m.id === id);
+    if (!mat) return;
+    
+    const spec = specsData.find(s => s.id === mat.spec_id);
+    const brand = brandsData.find(b => b.id === spec?.brand_id);
+    const basePath = `${currentLine} 线 > ${brand?.name || ''} > ${spec?.name || ''} > ${mat.custom_name}`;
+    
+    if (mat.material_type === 'BOTTLE') {
+        const p1Raw = prompt('p1 (g)：', mat.p1);
+        if (p1Raw === null) { document.querySelector('.context-menu')?.remove(); return; }
+        const p1Check = validateNumber(p1Raw, 'p1');
+        if (!p1Check.valid) { alert(p1Check.error); return; }
+        
+        const remark = prompt('备注（可为空）：', mat.remark || '');
+        if (remark === null) { document.querySelector('.context-menu')?.remove(); return; }
+        
+        await openDB();
+        const updated = { ...mat, p1: p1Check.value, remark: remark.trim(), updated_at: Math.floor(Date.now()/1000) };
+        const tx = db.transaction('materials', 'readwrite');
+        const store = tx.objectStore('materials');
+        await new Promise((resolve, reject) => { const req = store.put(updated); req.onsuccess = resolve; req.onerror = reject; });
+        
+        await addLog({ operation_type: 'UPDATE', table_name: 'materials',
+            data_json: JSON.stringify({ type: 'UPDATE', table: 'materials', path: basePath, changes: { p1: { old: mat.p1, new: updated.p1 } } }),
+            created_at: Math.floor(Date.now()/1000) });
+        
+    } else if (mat.material_type === 'PUMP_CAP') {
+        // p1, t1, t2, remark
+        const p1Raw = prompt('p1 (g)：', mat.p1);
+        if (p1Raw === null) { document.querySelector('.context-menu')?.remove(); return; }
+        const p1Check = validateNumber(p1Raw, 'p1');
+        if (!p1Check.valid) { alert(p1Check.error); return; }
+        
+        const t1Raw = prompt('t1 纸箱去皮 (kg)：', mat.t1);
+        if (t1Raw === null) { document.querySelector('.context-menu')?.remove(); return; }
+        const t1Check = validateNumber(t1Raw, 't1');
+        if (!t1Check.valid) { alert(t1Check.error); return; }
+        
+        const t2Raw = prompt('t2 胶箱去皮 (kg)：', mat.t2);
+        if (t2Raw === null) { document.querySelector('.context-menu')?.remove(); return; }
+        const t2Check = validateNumber(t2Raw, 't2');
+        if (!t2Check.valid) { alert(t2Check.error); return; }
+        
+        const remark = prompt('备注（可为空）：', mat.remark || '');
+        if (remark === null) { document.querySelector('.context-menu')?.remove(); return; }
+        
+        await openDB();
+        const updated = { ...mat, p1: p1Check.value, t1: t1Check.value, t2: t2Check.value, remark: remark.trim(), updated_at: Math.floor(Date.now()/1000) };
+        const tx = db.transaction('materials', 'readwrite');
+        const store = tx.objectStore('materials');
+        await new Promise((resolve, reject) => { const req = store.put(updated); req.onsuccess = resolve; req.onerror = reject; });
+        
+        await addLog({ operation_type: 'UPDATE', table_name: 'materials',
+            data_json: JSON.stringify({ type: 'UPDATE', table: 'materials', path: basePath, changes: { p1: { old: mat.p1, new: updated.p1 }, t1: { old: mat.t1, new: updated.t1 }, t2: { old: mat.t2, new: updated.t2 } } }),
+            created_at: Math.floor(Date.now()/1000) });
+        
+    } else if (mat.material_type === 'LABEL' || mat.material_type === 'PROMO_TAG') {
+        // m, c, q, remark（促销标签多 m_code）
+        const changes = {};
+        
+        if (mat.material_type === 'PROMO_TAG') {
+            const codeRaw = prompt('促销代码 (m_code)：', mat.m_code || '');
+            if (codeRaw === null) { document.querySelector('.context-menu')?.remove(); return; }
+            if (!/^\d+$/.test(codeRaw.trim())) { alert('促销代码必须为纯数字'); return; }
+            if (mat.m_code !== codeRaw.trim()) changes.m_code = { old: mat.m_code, new: codeRaw.trim() };
+            mat.m_code = codeRaw.trim();
+        }
+        
+        const mRaw = prompt('m (kg)：', mat.m);
+        if (mRaw === null) { document.querySelector('.context-menu')?.remove(); return; }
+        const mCheck = validateNumber(mRaw, 'm');
+        if (!mCheck.valid) { alert(mCheck.error); return; }
+        if (mat.m !== mCheck.value) changes.m = { old: mat.m, new: mCheck.value };
+        
+        const cRaw = prompt('c (kg)：', mat.c);
+        if (cRaw === null) { document.querySelector('.context-menu')?.remove(); return; }
+        const cCheck = validateNumber(cRaw, 'c');
+        if (!cCheck.valid) { alert(cCheck.error); return; }
+        if (mat.c !== cCheck.value) changes.c = { old: mat.c, new: cCheck.value };
+        
+        const qRaw = prompt('q (EA)：', mat.q);
+        if (qRaw === null) { document.querySelector('.context-menu')?.remove(); return; }
+        const qCheck = validateInt(qRaw, 'q');
+        if (!qCheck.valid) { alert(qCheck.error); return; }
+        if (mat.q !== qCheck.value) changes.q = { old: mat.q, new: qCheck.value };
+        
+        const remark = prompt('备注（可为空）：', mat.remark || '');
+        if (remark === null) { document.querySelector('.context-menu')?.remove(); return; }
+        
+        await openDB();
+        const updated = { ...mat, m: mCheck.value, c: cCheck.value, q: qCheck.value, remark: remark.trim(), updated_at: Math.floor(Date.now()/1000) };
+        const tx = db.transaction('materials', 'readwrite');
+        const store = tx.objectStore('materials');
+        await new Promise((resolve, reject) => { const req = store.put(updated); req.onsuccess = resolve; req.onerror = reject; });
+        
+        if (Object.keys(changes).length > 0) {
+            await addLog({ operation_type: 'UPDATE', table_name: 'materials',
+                data_json: JSON.stringify({ type: 'UPDATE', table: 'materials', path: basePath, changes }),
+                created_at: Math.floor(Date.now()/1000) });
+        }
+    }
+    
+    materialsData = await getAll('materials');
+    renderMaterials();
+    updateCalcUI();
+    updateBadge();
+    document.querySelector('.context-menu')?.remove();
+}
+    // ==================== 材料删除 ====================
+async function deleteMaterial(id) {
+    if (!confirm('确定删除该材料吗？')) return;
+    const mat = materialsData.find(m => m.id === id);
+    if (!mat) return;
+    
+    const spec = specsData.find(s => s.id === mat.spec_id);
+    const brand = brandsData.find(b => b.id === spec?.brand_id);
+    
+    await openDB();
+    const tx = db.transaction('materials', 'readwrite');
+    const store = tx.objectStore('materials');
+    await new Promise((resolve, reject) => { const req = store.delete(id); req.onsuccess = resolve; req.onerror = reject; });
+    
+    // 日志只记业务字段，不含 remark
+    const logData = { type: 'DELETE', table: 'materials',
+        path: `${currentLine} 线 > ${brand?.name || ''} > ${spec?.name || ''} > ${mat.custom_name}`,
+        deleted_data: {}
+    };
+    if (mat.material_type === 'BOTTLE') logData.deleted_data = { p1: mat.p1 };
+    else if (mat.material_type === 'PUMP_CAP') logData.deleted_data = { p1: mat.p1, t1: mat.t1, t2: mat.t2 };
+    else logData.deleted_data = { m: mat.m, c: mat.c, q: mat.q, ...(mat.m_code ? { m_code: mat.m_code } : {}) };
+    
+    await addLog({ operation_type: 'DELETE', table_name: 'materials',
+        data_json: JSON.stringify(logData), created_at: Math.floor(Date.now()/1000) });
+    
+    materialsData = await getAll('materials');
+    renderMaterials();
+    updateCalcUI();
+    updateBadge();
+    document.querySelector('.context-menu')?.remove();
+}
 // ==================== 计算更新 ====================
 function updateCalcUI() {
     const active = selectedMaterial || selectedPromoTag;
@@ -320,7 +492,42 @@ document.addEventListener('click', function(e) {
         enterCalcPage();
     }
 });
+// ==================== 数值校验工具 ====================
+function validateNumber(val, label, allowDecimal = true) {
+    if (val === null || val.trim() === '') {
+        return { valid: false, value: null, error: `${label}不能为空` };
+    }
+    const num = allowDecimal ? parseFloat(val) : parseInt(val, 10);
+    if (isNaN(num)) {
+        return { valid: false, value: null, error: `${label}必须为有效数字` };
+    }
+    if (num <= 0) {
+        return { valid: false, value: null, error: `${label}必须为正数` };
+    }
+    // 总位数 ≤ 8（不含小数点）
+    const digits = val.replace('.', '').replace('-', '');
+    if (digits.length > 8) {
+        return { valid: false, value: null, error: `${label}最多8位数字` };
+    }
+    return { valid: true, value: num, error: null };
+}
 
+function validateInt(val, label) {
+    if (val === null || val.trim() === '') {
+        return { valid: false, value: null, error: `${label}不能为空` };
+    }
+    if (!/^\d+$/.test(val.trim())) {
+        return { valid: false, value: null, error: `${label}必须为正整数` };
+    }
+    const num = parseInt(val, 10);
+    if (num <= 0) {
+        return { valid: false, value: null, error: `${label}必须为正整数` };
+    }
+    if (val.trim().length > 8) {
+        return { valid: false, value: null, error: `${label}最多8位数字` };
+    }
+    return { valid: true, value: num, error: null };
+}
 // ==================== 子按钮事件委托 ====================
 subOptions.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
@@ -334,3 +541,240 @@ subOptions.addEventListener('click', (e) => {
         bottleTotal();
     }
 });
+// ==================== 新增材料函数 ====================
+async function addBottleMaterial() {
+    const p1Raw = prompt('请输入 p1 (g)：');
+    const p1Check = validateNumber(p1Raw, 'p1');
+    if (!p1Check.valid) { alert(p1Check.error); return; }
+    
+    const name = prompt('请输入材料名称（可为空）：', '');
+    if (name === null) return;
+    const remark = prompt('请输入备注（可为空）：', '');
+    if (remark === null) return;
+
+    await openDB();
+    const all = await getAll('materials');
+    const maxId = all.reduce((max, m) => Math.max(max, m.id || 0), 0);
+    const newMat = {
+        id: maxId + 1,
+        spec_id: selectedSpecId,
+        material_type: 'BOTTLE',
+        custom_name: name.trim() || `瓶子 ${maxId + 1}`,
+        p1: p1Check.value,
+        remark: remark.trim(),
+        created_at: Math.floor(Date.now() / 1000),
+        updated_at: Math.floor(Date.now() / 1000)
+    };
+    const tx = db.transaction('materials', 'readwrite');
+    const store = tx.objectStore('materials');
+    await new Promise((resolve, reject) => {
+        const req = store.add(newMat);
+        req.onsuccess = resolve;
+        req.onerror = reject;
+    });
+    await addLog({
+        operation_type: 'INSERT',
+        table_name: 'materials',
+        data_json: JSON.stringify({
+            type: 'INSERT',
+            table: 'materials',
+            path: `${currentLine} 线 > ${brandsData.find(b => b.id === specsData.find(s => s.id === selectedSpecId)?.brand_id)?.name} > ${specsData.find(s => s.id === selectedSpecId)?.name} > ${newMat.custom_name}`,
+            data: { p1: newMat.p1 }
+        }),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    materialsData = await getAll('materials');
+    renderMaterials();
+    updateCalcUI();
+    updateBadge();
+    document.getElementById('dropdown-menu').style.display = 'none';
+    menuVisible = false;
+}
+
+async function addPumpCapMaterial() {
+    const p1Raw = prompt('请输入 p1 (g)：');
+    const p1Check = validateNumber(p1Raw, 'p1');
+    if (!p1Check.valid) { alert(p1Check.error); return; }
+    
+    const t1Raw = prompt('请输入 t1 (纸箱去皮 kg)：');
+    const t1Check = validateNumber(t1Raw, 't1');
+    if (!t1Check.valid) { alert(t1Check.error); return; }
+    
+    const t2Raw = prompt('请输入 t2 (胶箱去皮 kg)：');
+    const t2Check = validateNumber(t2Raw, 't2');
+    if (!t2Check.valid) { alert(t2Check.error); return; }
+    
+    const name = prompt('请输入材料名称（可为空）：', '');
+    if (name === null) return;
+    const remark = prompt('请输入备注（可为空）：', '');
+    if (remark === null) return;
+
+    await openDB();
+    const all = await getAll('materials');
+    const maxId = all.reduce((max, m) => Math.max(max, m.id || 0), 0);
+    const newMat = {
+        id: maxId + 1,
+        spec_id: selectedSpecId,
+        material_type: 'PUMP_CAP',
+        custom_name: name.trim() || `泵盖 ${maxId + 1}`,
+        p1: p1Check.value,
+        t1: t1Check.value,
+        t2: t2Check.value,
+        remark: remark.trim(),
+        created_at: Math.floor(Date.now() / 1000),
+        updated_at: Math.floor(Date.now() / 1000)
+    };
+    const tx = db.transaction('materials', 'readwrite');
+    const store = tx.objectStore('materials');
+    await new Promise((resolve, reject) => {
+        const req = store.add(newMat);
+        req.onsuccess = resolve;
+        req.onerror = reject;
+    });
+    await addLog({
+        operation_type: 'INSERT',
+        table_name: 'materials',
+        data_json: JSON.stringify({
+            type: 'INSERT',
+            table: 'materials',
+            path: `${currentLine} 线 > ${brandsData.find(b => b.id === specsData.find(s => s.id === selectedSpecId)?.brand_id)?.name} > ${specsData.find(s => s.id === selectedSpecId)?.name} > ${newMat.custom_name}`,
+            data: { p1: newMat.p1, t1: newMat.t1, t2: newMat.t2 }
+        }),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    materialsData = await getAll('materials');
+    renderMaterials();
+    updateCalcUI();
+    updateBadge();
+    document.getElementById('dropdown-menu').style.display = 'none';
+    menuVisible = false;
+}
+
+async function addLabelMaterial() {
+    const mRaw = prompt('请输入 m (kg)：');
+    const mCheck = validateNumber(mRaw, 'm');
+    if (!mCheck.valid) { alert(mCheck.error); return; }
+    
+    const cRaw = prompt('请输入 c (kg)：');
+    const cCheck = validateNumber(cRaw, 'c');
+    if (!cCheck.valid) { alert(cCheck.error); return; }
+    
+    const qRaw = prompt('请输入 q (EA)：');
+    const qCheck = validateInt(qRaw, 'q');
+    if (!qCheck.valid) { alert(qCheck.error); return; }
+    
+    const name = prompt('请输入材料名称（可为空）：', '');
+    if (name === null) return;
+    const remark = prompt('请输入备注（可为空）：', '');
+    if (remark === null) return;
+
+    await openDB();
+    const all = await getAll('materials');
+    const maxId = all.reduce((max, m) => Math.max(max, m.id || 0), 0);
+    const newMat = {
+        id: maxId + 1,
+        spec_id: selectedSpecId,
+        material_type: 'LABEL',
+        custom_name: name.trim() || `标签 ${maxId + 1}`,
+        m: mCheck.value,
+        c: cCheck.value,
+        q: qCheck.value,
+        remark: remark.trim(),
+        created_at: Math.floor(Date.now() / 1000),
+        updated_at: Math.floor(Date.now() / 1000)
+    };
+    const tx = db.transaction('materials', 'readwrite');
+    const store = tx.objectStore('materials');
+    await new Promise((resolve, reject) => {
+        const req = store.add(newMat);
+        req.onsuccess = resolve;
+        req.onerror = reject;
+    });
+    await addLog({
+        operation_type: 'INSERT',
+        table_name: 'materials',
+        data_json: JSON.stringify({
+            type: 'INSERT',
+            table: 'materials',
+            path: `${currentLine} 线 > ${brandsData.find(b => b.id === specsData.find(s => s.id === selectedSpecId)?.brand_id)?.name} > ${specsData.find(s => s.id === selectedSpecId)?.name} > ${newMat.custom_name}`,
+            data: { m: newMat.m, c: newMat.c, q: newMat.q }
+        }),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    materialsData = await getAll('materials');
+    renderMaterials();
+    updateCalcUI();
+    updateBadge();
+    document.getElementById('dropdown-menu').style.display = 'none';
+    menuVisible = false;
+}
+
+async function addPromoTagMaterial() {
+    const codeRaw = prompt('请输入促销代码 (m_code)：');
+    if (!codeRaw || codeRaw.trim() === '') {
+        alert('促销代码不能为空');
+        return;
+    }
+    if (!/^\d+$/.test(codeRaw.trim())) {
+        alert('促销代码必须为纯数字');
+        return;
+    }
+    
+    const mRaw = prompt('请输入 m (kg)：');
+    const mCheck = validateNumber(mRaw, 'm');
+    if (!mCheck.valid) { alert(mCheck.error); return; }
+    
+    const cRaw = prompt('请输入 c (kg)：');
+    const cCheck = validateNumber(cRaw, 'c');
+    if (!cCheck.valid) { alert(cCheck.error); return; }
+    
+    const qRaw = prompt('请输入 q (EA)：');
+    const qCheck = validateInt(qRaw, 'q');
+    if (!qCheck.valid) { alert(qCheck.error); return; }
+    
+    const name = prompt('请输入材料名称（可为空）：', '');
+    if (name === null) return;
+    const remark = prompt('请输入备注（可为空）：', '');
+    if (remark === null) return;
+
+    await openDB();
+    const all = await getAll('materials');
+    const maxId = all.reduce((max, m) => Math.max(max, m.id || 0), 0);
+    const newMat = {
+        id: maxId + 1,
+        spec_id: selectedSpecId,
+        material_type: 'PROMO_TAG',
+        m_code: codeRaw.trim(),
+        custom_name: name.trim() || `促销 ${codeRaw.trim()}`,
+        m: mCheck.value,
+        c: cCheck.value,
+        q: qCheck.value,
+        remark: remark.trim(),
+        created_at: Math.floor(Date.now() / 1000),
+        updated_at: Math.floor(Date.now() / 1000)
+    };
+    const tx = db.transaction('materials', 'readwrite');
+    const store = tx.objectStore('materials');
+    await new Promise((resolve, reject) => {
+        const req = store.add(newMat);
+        req.onsuccess = resolve;
+        req.onerror = reject;
+    });
+    await addLog({
+        operation_type: 'INSERT',
+        table_name: 'materials',
+        data_json: JSON.stringify({
+            type: 'INSERT',
+            table: 'materials',
+            path: `${currentLine} 线 > ${brandsData.find(b => b.id === specsData.find(s => s.id === selectedSpecId)?.brand_id)?.name} > ${specsData.find(s => s.id === selectedSpecId)?.name} > ${newMat.custom_name}`,
+            data: { m_code: newMat.m_code, m: newMat.m, c: newMat.c, q: newMat.q }
+        }),
+        created_at: Math.floor(Date.now() / 1000)
+    });
+    materialsData = await getAll('materials');
+    renderMaterials();
+    updateCalcUI();
+    updateBadge();
+    document.getElementById('dropdown-menu').style.display = 'none';
+    menuVisible = false;
+}
