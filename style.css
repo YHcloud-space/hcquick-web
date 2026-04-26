@@ -10,6 +10,7 @@ body {
 
 /* 顶部标题栏 */
 #top-bar {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
