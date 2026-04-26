@@ -659,3 +659,49 @@ input[type="text"] {
     border-color: #64B5F6;
     background: #FFFFFF;
 }
+/* 日志查看对话框 */
+#log-viewer-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#log-viewer-dialog {
+    background: #FFFFFF;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 420px;
+    max-height: 70vh;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+#log-viewer-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    text-align: center;
+}
+#log-viewer-list {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.8;
+}
+.log-entry {
+    border-bottom: 1px solid #F0F0F0;
+    padding: 8px 0;
+    margin-bottom: 4px;
+}
+.log-entry:last-child { border-bottom: none; }
+.log-type { font-weight: bold; }
+.log-type.INSERT { color: #4CAF50; }
+.log-type.UPDATE { color: #FF9800; }
+.log-type.DELETE { color: #E53935; }
+.log-path { color: #555; font-size: 12px; margin: 2px 0; }
+.log-changes { font-size: 12px; color: #333; margin: 2px 0; }
+.log-time { font-size: 11px; color: #999; margin-top: 2px; }
