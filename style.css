@@ -705,3 +705,51 @@ input[type="text"] {
 .log-path { color: #555; font-size: 12px; margin: 2px 0; }
 .log-changes { font-size: 12px; color: #333; margin: 2px 0; }
 .log-time { font-size: 11px; color: #999; margin-top: 2px; }
+/* 同步角标：红色叹号 */
+#sync-badge.warn {
+    background: #E53935;
+    color: #fff;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 同步角标：绿色NEW */
+#sync-badge.info {
+    background: #4CAF50;
+    color: #fff;
+    border-radius: 4px;
+    min-width: auto;
+    height: 16px;
+    font-size: 9px;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 日志角标 */
+#log-badge {
+    display: none;
+    background: #E53935;
+    color: #fff;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+    margin-left: 8px;
+    line-height: 1;
+    padding: 0 4px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+}
