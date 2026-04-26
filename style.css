@@ -801,3 +801,7 @@ input[type="text"] {
     font-weight: bold;
     color: #333;
 }
+#log-viewer-close {
+    height: 44px;
+    font-size: 15px;
+}
