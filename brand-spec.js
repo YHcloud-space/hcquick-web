@@ -70,6 +70,11 @@ async function loadFromCache() {
       specsData = specs;
       materialsData = materials;
       localVersion = parseInt(version) || 0;
+      // 恢复上次选中的线号
+        const savedLine = await getMeta('current_line');
+        if (savedLine && ['V', 'C', 'R'].includes(savedLine)) {
+            currentLine = savedLine;
+        }  
       renderBrands();
       renderSpecs();
       updateBadge();
@@ -220,7 +225,7 @@ function renderSpecs() {
 }
 // ==================== 线号切换 ====================
 lineBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
         lineBtns.forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         currentLine = btn.dataset.line;
@@ -229,6 +234,7 @@ lineBtns.forEach(btn => {
         titleEl.textContent = 'HCQuick';
         renderBrands();
         renderSpecs();
+        await putMeta('current_line', currentLine);
     });
 });
 let serverNewVersion = false;  // 服务器是否有新版本
