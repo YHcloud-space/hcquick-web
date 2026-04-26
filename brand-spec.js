@@ -13,15 +13,43 @@ let localVersion = 0;
 async function updateBadge() {
     try {
         const logs = await getAllLogs();
-        const hasChanges = logs.length > 0;
+        const hasLocalChanges = logs.length > 0;
         const syncBadge = document.getElementById('sync-badge');
+        const logBadge = document.getElementById('log-badge');
+
+        // 日志角标：显示条数
+        if (logBadge) {
+            if (hasLocalChanges) {
+                logBadge.style.display = 'inline-flex';
+                logBadge.textContent = logs.length;
+            } else {
+                logBadge.style.display = 'none';
+            }
+        }
+
+        // 同步角标：根据组合状态显示
         if (syncBadge) {
-            syncBadge.style.display = hasChanges ? 'inline-flex' : 'none';
-            if (hasChanges) syncBadge.textContent = logs.length;
+            syncBadge.className = ''; // 清除旧类
+            if (hasLocalChanges && serverNewVersion) {
+                // 同时有本地修改和新数据库 → 红色!
+                syncBadge.textContent = '!';
+                syncBadge.classList.add('warn');
+                syncBadge.style.display = 'inline-flex';
+            } else if (!hasLocalChanges && serverNewVersion) {
+                // 只有新数据库 → 绿色NEW
+                syncBadge.textContent = 'NEW';
+                syncBadge.classList.add('info');
+                syncBadge.style.display = 'inline-flex';
+            } else {
+                // 其它情况不显示
+                syncBadge.style.display = 'none';
+            }
         }
     } catch (e) {
         const syncBadge = document.getElementById('sync-badge');
+        const logBadge = document.getElementById('log-badge');
         if (syncBadge) syncBadge.style.display = 'none';
+        if (logBadge) logBadge.style.display = 'none';
     }
 }
 
@@ -67,11 +95,14 @@ async function loadData() {
     
     if (remoteVersion <= localVersion && brandsData.length > 0) {
       console.log('已经是最新版本:', localVersion);
+      serverNewVersion = false;
+      await putMeta('server_new_version', 'false');  
       return;
     }
     
     console.log(`发现新版本: ${remoteVersion} (本地: ${localVersion})`);
-    
+    serverNewVersion = true;
+    await putMeta('server_new_version', 'true');
     const dataResp = await fetch('https://data.cloudgj.cn/hcquick_data.json');
     if (!dataResp.ok) throw new Error('数据下载失败');
     const json = await dataResp.json();
@@ -188,7 +219,7 @@ lineBtns.forEach(btn => {
         renderSpecs();
     });
 });
-
+let serverNewVersion = false;  // 服务器是否有新版本
 // ==================== 菜单功能 ====================
 let menuVisible = false;
 let isInCalcPage = false;
@@ -196,11 +227,15 @@ let isInCalcPage = false;
 function renderMenu() {
     const menu = document.getElementById('dropdown-menu');
     const syncHTML = `
-        <div class="menu-item" onclick="handleSync()">
-            🔄 同步
-            <span id="sync-badge" style="display:none;">1</span>
-        </div>`;
-    const logHTML = `<div class="menu-item" onclick="showLogDialog()">📋 日志</div>`;
+    <div class="menu-item" onclick="handleSync()">
+        🔄 同步
+        <span id="sync-badge" style="display:none;"></span>
+    </div>`;
+const logHTML = `
+    <div class="menu-item" onclick="showLogDialog()">
+        📋 日志
+        <span id="log-badge" style="display:none;"></span>
+    </div>`;
     const settingsHTML = `<div class="menu-item" onclick="showSettingsDialog()">⚙️ 设置</div>`;
     if (isInCalcPage) {
         menu.innerHTML = `
@@ -258,15 +293,26 @@ async function handleSync() {
     }
     
     // 2. 无本地修改，直接进行数据更新
-    const oldVersion = localVersion;
+        const oldVersion = localVersion;
     await loadData();
     if (localVersion > oldVersion) {
-        location.reload(); // 有新版本，刷新页面
+        serverNewVersion = false;
+        await putMeta('server_new_version', 'false');
+        location.reload();
     } else {
-        alert('数据已是最新版本');
+        // 需确认：新版可能在启动时已检测到
+        if (serverNewVersion) {
+            if (confirm('发现新版本数据库，是否下载？')) {
+                await loadData();
+                serverNewVersion = false;
+                await putMeta('server_new_version', 'false');
+                location.reload();
+            }
+        } else {
+            alert('数据已是最新版本');
+        }
     }
 }
-
 async function checkAndSync() {
     try {
         const logs = await getAllLogs();
@@ -826,6 +872,8 @@ document.getElementById('log-viewer-close').addEventListener('click', () => {
         materialsData = await getAll('materials');
         const version = await getMeta('local_version');
         localVersion = parseInt(version) || 0;
+        const serverNew = await getMeta('server_new_version');
+        serverNewVersion = serverNew === 'true';
         renderBrands();
         renderSpecs();
         updateBadge();
