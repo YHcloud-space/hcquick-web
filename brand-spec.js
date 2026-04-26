@@ -208,11 +208,6 @@ function renderMenu() {
         <div class="menu-item" onclick="addPumpCapMaterial()">+ 增加泵盖类</div>
         <div class="menu-item" onclick="addLabelMaterial()">+ 增加标签类</div>
         <div class="menu-item" onclick="addPromoTagMaterial()">+ 增加促销标签类</div>
-        <div class="divider"></div>
-        ${syncHTML}
-        <div class="divider"></div>
-        ${logHTML}
-        ${settingsHTML}
     `;
 }
 
