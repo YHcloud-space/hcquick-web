@@ -500,10 +500,46 @@ function saveAndRestart() {
 }
 
 // ==================== 日志对话框 ====================
-function showLogDialog() {
+async function showLogDialog() {
     menuVisible = false;
     document.getElementById('dropdown-menu').style.display = 'none';
-    alert('本地修改日志功能将在后续版本完善');
+    
+    const logs = await getAllLogs();
+    const listEl = document.getElementById('log-viewer-list');
+    
+    if (logs.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">暂无本地修改记录</div>';
+    } else {
+        listEl.innerHTML = logs.slice().reverse().map(log => {
+            let data;
+            try {
+                data = JSON.parse(log.data_json);
+            } catch {
+                data = { type: '未知', path: '解析失败' };
+            }
+            const typeMap = { INSERT: '新增', UPDATE: '修改', DELETE: '删除' };
+            const typeName = typeMap[data.type] || data.type || '未知';
+            const time = new Date(log.created_at * 1000).toLocaleString('zh-CN');
+            
+            let changesHTML = '';
+            if (data.changes) {
+                changesHTML = Object.entries(data.changes).map(([key, val]) => {
+                    return `${key}: ${val.old} → ${val.new}`;
+                }).join('<br>');
+            }
+            
+            return `
+                <div class="log-entry">
+                    <div class="log-type ${data.type}">操作：${typeName}</div>
+                    <div class="log-path">路径：${data.path || '未知'}</div>
+                    ${changesHTML ? `<div class="log-changes">变更：<br>${changesHTML}</div>` : ''}
+                    <div class="log-time">时间：${time}</div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    document.getElementById('log-viewer-overlay').style.display = 'flex';
 }
 
 // ==================== 导入导出 ====================
@@ -775,6 +811,10 @@ async function forceSyncAndReload() {
         alert('强制同步失败，请检查网络后重试');
     }
 }
+// 日志弹窗关闭
+document.getElementById('log-viewer-close').addEventListener('click', () => {
+    document.getElementById('log-viewer-overlay').style.display = 'none';
+});
 // ==================== 启动 ====================
 (async () => {
     await openDB();
