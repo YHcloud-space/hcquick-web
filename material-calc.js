@@ -683,7 +683,7 @@ function openMaterialEditor(type, matData = null) {
     if (matData) {
         materialEditMode = 'edit';
         materialEditId = matData.id;
-        document.getElementById('material-edit-title').textContent = '编辑材料';
+        document.getElementById('material-edit-title').textContent = '编辑' + (typeNames[type] || '材料');
         document.getElementById('me-name').value = matData.custom_name || '';
         document.getElementById('me-code').value = matData.m_code || '';
         document.getElementById('me-p1').value = matData.p1 ?? '';
@@ -696,7 +696,8 @@ function openMaterialEditor(type, matData = null) {
     } else {
         materialEditMode = 'add';
         materialEditId = null;
-        document.getElementById('material-edit-title').textContent = '新增材料';
+        const typeNames = { BOTTLE: '瓶子', PUMP_CAP: '泵盖', LABEL: '标签', PROMO_TAG: '促销标签' };
+document.getElementById('material-edit-title').textContent = '新增' + (typeNames[type] || '材料');
         document.getElementById('me-name').value = '';
         document.getElementById('me-code').value = '';
         document.getElementById('me-p1').value = '';
