@@ -33,8 +33,9 @@ function enterCalcPage() {
     renderMaterials();
     if (spec?.remark) {
         propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格: ${spec.remark}</div>`;
+    } else {
+        updateCalcUI();
     }
-    updateCalcUI();
     inputX.focus();
 }
 
