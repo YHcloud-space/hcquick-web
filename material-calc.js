@@ -202,7 +202,7 @@ function updateCalcUI() {
             <div style="display:flex;align-items:center;gap:8px;width:100%;background:#F5F5F5;padding:8px;border-radius:8px;">
                 <span style="font-size:12px;color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bottleAccum.expression || '—'}</span>
                 <button class="sub-btn" data-action="bottleTotal">Total</button>
-                <span style="background:#FFF0F5;padding:4px 8px;border-radius:8px;font-weight:bold;color:#1565C0;">${bottleAccum.totalEA.toFixed(1)}</span>
+                <span style="background:#FFF0F5;padding:8px 12px;border-radius:8px;font-weight:bold;color:#1565C0;font-size:14px;">${bottleAccum.totalEA.toFixed(1)}</span>
             </div>
         `;
     }
@@ -289,6 +289,26 @@ function bottleTotal() {
 
 // ==================== 促销标签对话框 ====================
 let promoTagUsageMap = {};
+// 从 IndexedDB 加载点击率
+async function loadPromoUsageMap() {
+    try {
+        const saved = await getMeta('promo_usage_map');
+        if (saved) {
+            promoTagUsageMap = JSON.parse(saved);
+        }
+    } catch (e) {
+        promoTagUsageMap = {};
+    }
+}
+
+// 保存点击率到 IndexedDB
+async function savePromoUsageMap() {
+    try {
+        await putMeta('promo_usage_map', JSON.stringify(promoTagUsageMap));
+    } catch (e) {
+        // 静默失败，不弹提示
+    }
+}
 
 function openPromoDialog() {
     const dialog = document.getElementById('promo-dialog-overlay');
@@ -365,6 +385,7 @@ function selectPromoTag(promo) {
     selectedPromoTag = promo;
     selectedMaterial = null;
     promoTagUsageMap[promo.id] = (promoTagUsageMap[promo.id] || 0) + 1;
+    savePromoUsageMap();  // ✅ 持久化
 
     renderMaterials();
 
