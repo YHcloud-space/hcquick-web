@@ -106,9 +106,9 @@ function getAllLogs() {
 }
 
 // 新增：清空日志
-function clearAllLogs() {
+async function clearAllLogs() {
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('pending_operations', 'clear');
+    const tx = db.transaction('pending_operations', 'readwrite');
     const store = tx.objectStore('pending_operations');
     const request = store.clear();
     request.onsuccess = () => resolve();
