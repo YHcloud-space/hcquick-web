@@ -9,10 +9,6 @@ const promoCard = document.getElementById('promo-card');
 const subOptions = document.getElementById('sub-options');
 const propertyCard = document.getElementById('property-card');
 
-inputX.addEventListener('focus', function() {
-    this.value = '';
-});
-
 let selectedMaterial = null;
 let isFirstMaterialClick = true;
 let selectedPromoTag = null;
@@ -146,8 +142,8 @@ function updateCalcUI() {
     calcResult();
 }
 
-function setPeel(mode) { peelMode = mode; updateCalcUI(); }
-function setRoll(n) { rollCount = n; updateCalcUI(); }
+function setPeel(mode) { peelMode = mode; updateCalcUI(); inputX.focus(); }
+function setRoll(n) { rollCount = n; updateCalcUI(); inputX.focus(); }
 
 
 function buildPropertyText(m) {
