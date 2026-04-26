@@ -231,7 +231,7 @@ function buildPropertyText(m) {
         if (m.remark) {
         text += `<br><strong style="font-size:14px;">备注: ${m.remark}</strong>`;
     }
-    }
+    
     return text;
 }
 
