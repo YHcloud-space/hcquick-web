@@ -32,7 +32,7 @@ function enterCalcPage() {
     
     renderMaterials();
     if (spec?.remark) {
-        propertyCard.innerHTML = `<div style="margin-bottom:8px;">规格: ${spec.remark}</div>`;
+    propertyCard.innerHTML = `<div style="margin-bottom:8px;font-size:14px;font-weight:bold;">规格: ${spec.remark}</div>`;
     } else {
         updateCalcUI();
     }
@@ -228,8 +228,9 @@ function buildPropertyText(m) {
             break;
         default: text = '';
     }
-    if (m.remark) {
-        text += `<br>备注: ${m.remark}`;
+        if (m.remark) {
+        text += `<br><strong style="font-size:14px;">备注: ${m.remark}</strong>`;
+    }
     }
     return text;
 }
