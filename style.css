@@ -249,9 +249,10 @@ body {
 #material-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 40px;
     gap: 8px;
     margin-bottom: 12px;
-    max-height: 144px;
+    max-height: 136px;   /* 40*3 + 8*2 = 136，精确3行 */
     overflow-y: auto;
 }
 /* EA 标签外层容器（相对定位锚点） */
@@ -524,6 +525,22 @@ body {
 }
 .menu-item:hover { background: #F5F5F5; }
 .divider { height: 1px; background: #E5E5E5; margin: 4px 0; }
+
+#sync-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #E53935;
+    color: #fff;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+    margin-left: 8px;
+    line-height: 1;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
 
 /* 设置对话框 */
 #settings-overlay {
