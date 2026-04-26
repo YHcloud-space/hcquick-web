@@ -613,7 +613,7 @@ input[type="text"] {
     z-index: 1002;
     display: flex;
     align-items: flex-start;
-    padding-top: 10vh;
+    padding-top: 8vh;
     justify-content: center;
 }
 #material-edit-dialog {
@@ -621,7 +621,7 @@ input[type="text"] {
     border-radius: 12px;
     width: 70%;
     max-width: 360px;
-    padding: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;      /* ✅ 新增：内部内容水平居中 */
@@ -775,4 +775,27 @@ input[type="text"] {
     height: 40px;
     font-size: 15px;
     border-radius: 8px;
+}
+/* 材料弹窗 — 按钮行撑满 */
+#material-edit-dialog > div:last-child {
+    margin-left: -14px;
+    margin-right: -14px;
+    width: calc(100% + 28px);
+    padding: 0 14px;
+    box-sizing: border-box;
+}
+
+/* 材料弹窗 — 按钮 */
+#me-btn-cancel,
+#me-btn-save {
+    flex: 1;
+    height: 44px;
+    font-size: 15px;
+    border-radius: 8px;
+}
+
+/* 备注标签加粗 */
+#me-row-remark .me-label-float {
+    font-weight: bold;
+    color: #333;
 }
