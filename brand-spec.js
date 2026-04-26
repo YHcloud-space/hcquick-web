@@ -372,18 +372,21 @@ function showBrandContextMenu(brand, element) {
 // ==================== 品牌编辑/删除 ====================
 async function editBrand(id) {
     const brand = brandsData.find(b => b.id === id);
-    const newName = prompt('编辑品牌名称：', brand.name);
-    if (newName && newName.trim() !== '') {
+
+    showFormEditor('编辑品牌', [
+        { label: '品牌名称', key: 'name', value: brand.name, type: 'text', required: true }
+    ], async (values) => {
         await openDB();
+        const updated = { ...brand, name: values.name, updated_at: Math.floor(Date.now() / 1000) };
+
         const tx = db.transaction('brands', 'readwrite');
         const store = tx.objectStore('brands');
-        const updated = { ...brand, name: newName.trim(), updated_at: Math.floor(Date.now() / 1000) };
         await new Promise((resolve, reject) => {
-            const request = store.put(updated);
-            request.onsuccess = resolve;
-            request.onerror = reject;
+            const req = store.put(updated);
+            req.onsuccess = resolve;
+            req.onerror = reject;
         });
-        
+
         const logData = {
             type: 'UPDATE',
             table: 'brands',
@@ -396,13 +399,12 @@ async function editBrand(id) {
             data_json: JSON.stringify(logData),
             created_at: Math.floor(Date.now() / 1000)
         });
-        
+
         brandsData = await getAll('brands');
         renderBrands();
         if (selectedBrandId === id) renderSpecs();
         updateBadge();
-    }
-    document.querySelector('.context-menu')?.remove();
+    });
 }
 
 async function deleteBrand(id) {
@@ -645,68 +647,115 @@ function showSpecContextMenu(spec, element) {
     };
     setTimeout(() => document.addEventListener('click', closeMenu), 100);
 }
+// ==================== 通用表单编辑器 ====================
+function showFormEditor(title, fields, onSave) {
+    // 移除可能残留的弹窗
+    document.getElementById('form-editor-overlay')?.remove();
 
+    const overlay = document.createElement('div');
+    overlay.id = 'form-editor-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1002;display:flex;align-items:center;justify-content:center;';
+
+    const dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#FFFFFF;border-radius:12px;width:80%;max-width:360px;padding:16px;display:flex;flex-direction:column;';
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:500;text-align:center;margin-bottom:14px;color:#333;">${title}</div>
+        ${fields.map(f => `
+            <div class="me-row">
+                <div class="me-input-wrap">
+                    <label class="me-label-float">${f.label}${f.key === 'remark' ? '（选填）' : ''}</label>
+                    <input type="text" class="me-input" id="fe-${f.key}" value="${f.value || ''}" ${f.type === 'number' ? 'inputmode="numeric"' : ''}>
+                </div>
+            </div>
+        `).join('')}
+        <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="dialog-btn-cancel" id="fe-btn-cancel" style="flex:1;height:44px;font-size:15px;border-radius:8px;">取消</button>
+            <button class="dialog-btn-danger" id="fe-btn-save" style="flex:1;height:44px;font-size:15px;border-radius:8px;">保存</button>
+        </div>
+    `;
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    // 关闭事件
+    const close = () => overlay.remove();
+    document.getElementById('fe-btn-cancel').addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    // 保存事件
+    document.getElementById('fe-btn-save').addEventListener('click', () => {
+        const values = {};
+        for (const f of fields) {
+            const input = document.getElementById(`fe-${f.key}`);
+            const val = input.value.trim();
+            if (f.required && !val) {
+                alert(`${f.label}不能为空`);
+                return;
+            }
+            if (f.key === 'sort') {
+                const num = parseInt(val);
+                if (isNaN(num) || num < 1 || num > 9999) {
+                    alert('规格数字需为1-4位正整数');
+                    return;
+                }
+                values[f.key] = num;
+            } else if (f.key === 'name') {
+                if (!val || val.length > 15) {
+                    alert('品牌名称需为1-15字符');
+                    return;
+                }
+                values[f.key] = val;
+            } else {
+                values[f.key] = val;
+            }
+        }
+        close();
+        onSave(values);
+    });
+}
 async function editSpec(id) {
     const spec = specsData.find(s => s.id === id);
     const brandName = brandsData.find(b => b.id === spec.brand_id)?.name || '';
-    
-    // 第一步：编辑规格数字（限定4位）
-    const newSort = prompt('编辑规格数字（1-4位）：', spec.sort_number);
-    if (!newSort || isNaN(parseInt(newSort))) {
-        document.querySelector('.context-menu')?.remove();
-        return;
-    }
-    const sortNum = parseInt(newSort);
-    if (sortNum < 1 || sortNum > 9999) {
-        alert('规格数字需为1-4位正整数');
-        document.querySelector('.context-menu')?.remove();
-        return;
-    }
-    
-    // 第二步：编辑备注
-    const newRemark = prompt('编辑规格备注（可为空）：', spec.remark || '');
-    if (newRemark === null) {
-        document.querySelector('.context-menu')?.remove();
-        return;
-    }
-    
-    await openDB();
-    const updated = {
-        ...spec,
-        sort_number: sortNum,
-        name: `${brandName} ${sortNum}`,
-        remark: newRemark.trim(),
-        updated_at: Math.floor(Date.now() / 1000)
-    };
-    
-    const tx = db.transaction('specs', 'readwrite');
-    const store = tx.objectStore('specs');
-    await new Promise((resolve, reject) => {
-        const request = store.put(updated);
-        request.onsuccess = resolve;
-        request.onerror = reject;
-    });
-    
-    // 日志：只记录排序变更，备注绝对不出现在日志中
-    const logData = {
-        type: 'UPDATE',
-        table: 'specs',
-        path: `${currentLine} 线 > ${brandName} > ${spec.name}`,
-        changes: { '排序': { old: spec.sort_number, new: sortNum } }
-    };
-    await addLog({
-        operation_type: 'UPDATE',
-        table_name: 'specs',
-        data_json: JSON.stringify(logData),
-        created_at: Math.floor(Date.now() / 1000)
-    });
-    
-    specsData = await getAll('specs');
-    renderSpecs();
-    updateBadge();
-    document.querySelector('.context-menu')?.remove();
-}
 
+    showFormEditor('编辑规格', [
+        { label: '规格数字', key: 'sort', value: spec.sort_number, type: 'number', required: true },
+        { label: '备注', key: 'remark', value: spec.remark || '', type: 'text', required: false }
+    ], async (values) => {
+        await openDB();
+        const updated = {
+            ...spec,
+            sort_number: values.sort,
+            name: `${brandName} ${values.sort}`,
+            remark: values.remark,
+            updated_at: Math.floor(Date.now() / 1000)
+        };
+
+        const tx = db.transaction('specs', 'readwrite');
+        const store = tx.objectStore('specs');
+        await new Promise((resolve, reject) => {
+            const req = store.put(updated);
+            req.onsuccess = resolve;
+            req.onerror = reject;
+        });
+
+        const logData = {
+            type: 'UPDATE',
+            table: 'specs',
+            path: `${currentLine} 线 > ${brandName} > ${spec.name}`,
+            changes: { '排序': { old: spec.sort_number, new: values.sort } }
+        };
+        await addLog({
+            operation_type: 'UPDATE',
+            table_name: 'specs',
+            data_json: JSON.stringify(logData),
+            created_at: Math.floor(Date.now() / 1000)
+        });
+
+        specsData = await getAll('specs');
+        renderSpecs();
+        updateBadge();
+    });
+}
 async function deleteSpec(id) {
     if (!confirm('确定删除该规格吗？')) return;
     const spec = specsData.find(s => s.id === id);
