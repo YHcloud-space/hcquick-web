@@ -679,6 +679,7 @@ let materialEditId = null;          // 编辑时存 id，新增时为 null
     // ==================== 打开材料编辑器 ====================
 function openMaterialEditor(type, matData = null) {
     materialEditType = type;
+    const typeNames = { BOTTLE: '瓶子', PUMP_CAP: '泵盖', LABEL: '标签', PROMO_TAG: '促销标签' };
     
     if (matData) {
         materialEditMode = 'edit';
@@ -696,8 +697,7 @@ function openMaterialEditor(type, matData = null) {
     } else {
         materialEditMode = 'add';
         materialEditId = null;
-        const typeNames = { BOTTLE: '瓶子', PUMP_CAP: '泵盖', LABEL: '标签', PROMO_TAG: '促销标签' };
-document.getElementById('material-edit-title').textContent = '新增' + (typeNames[type] || '材料');
+        document.getElementById('material-edit-title').textContent = '新增' + (typeNames[type] || '材料');
         document.getElementById('me-name').value = '';
         document.getElementById('me-code').value = '';
         document.getElementById('me-p1').value = '';
