@@ -27,21 +27,20 @@ async function updateBadge() {
             }
         }
 
-        // 同步角标：根据组合状态显示
+                // 同步角标：根据状态显示
         if (syncBadge) {
             syncBadge.className = ''; // 清除旧类
-            if (hasLocalChanges && serverNewVersion) {
-                // 同时有本地修改和新数据库 → 红色!
+            if (hasLocalChanges) {
+                // 有本地修改 → 红色!
                 syncBadge.textContent = '!';
                 syncBadge.classList.add('warn');
                 syncBadge.style.display = 'inline-flex';
-            } else if (!hasLocalChanges && serverNewVersion) {
-                // 只有新数据库 → 绿色NEW
+            } else if (serverNewVersion) {
+                // 无本地修改，但服务器有新版本 → 绿色NEW
                 syncBadge.textContent = 'NEW';
                 syncBadge.classList.add('info');
                 syncBadge.style.display = 'inline-flex';
             } else {
-                // 其它情况不显示
                 syncBadge.style.display = 'none';
             }
         }
