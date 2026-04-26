@@ -904,9 +904,11 @@ function openMaterialEditor(type, matData = null) {
     if (type === 'BOTTLE') matObj.p1 = p1;
     if (type === 'PUMP_CAP') { matObj.p1 = p1; matObj.t1 = t1; matObj.t2 = t2; }
     if (type === 'LABEL') { matObj.m = m; matObj.c = c; matObj.q = q; }
-    if (type === 'PROMO_TAG') { matObj.m_code = code; matObj.m = m; matObj.c = c; matObj.q = q; }
+        if (type === 'PROMO_TAG') { matObj.m_code = code; matObj.m = m; matObj.c = c; matObj.q = q; }
     
-    
+    const spec = specsData.find(s => s.id === selectedSpecId);
+    const brand = brandsData.find(b => b.id === spec?.brand_id);
+    const basePath = `${currentLine} 线 > ${brand?.name || ''} > ${spec?.name || ''} > ${matObj.custom_name}`;
     
     await openDB();
     
