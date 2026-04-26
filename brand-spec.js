@@ -221,12 +221,17 @@ menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!menuVisible) {
         renderMenu();
-        updateBadge(); // 每次打开菜单前刷新红点状态
+        updateBadge();
+        const menu = document.getElementById('dropdown-menu');
+        const btnRect = e.target.getBoundingClientRect();
+        menu.style.top = btnRect.bottom + 'px';
+        menu.style.right = (window.innerWidth - btnRect.right) + 'px';
+        menu.style.left = 'auto';
+        menu.style.display = 'block';
         menuVisible = true;
-        document.getElementById('dropdown-menu').style.display = 'block';
     } else {
-        menuVisible = false;
         document.getElementById('dropdown-menu').style.display = 'none';
+        menuVisible = false;
     }
 });
 
