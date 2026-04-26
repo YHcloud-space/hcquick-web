@@ -73,6 +73,7 @@ async function loadFromCache() {
       renderBrands();
       renderSpecs();
       updateBadge();
+    if (typeof loadPromoUsageMap === 'function') loadPromoUsageMap();  // ✅ 加载点击率
       console.log('从缓存加载成功，版本:', localVersion);
     } else {
       console.log('缓存为空，等待首次同步');
@@ -950,6 +951,7 @@ document.getElementById('log-viewer-close').addEventListener('click', () => {
         // 首次访问：自动拉取最新数据
         await loadData();
         updateBadge();
+        if (typeof loadPromoUsageMap === 'function') loadPromoUsageMap();  // ✅ 加载点击率
     }
 })();
 // ==================== 备注恢复 ====================
