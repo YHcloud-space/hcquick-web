@@ -99,7 +99,7 @@ const menuBtn = document.getElementById('menu-btn');
 // ==================== 数据同步（带版本检查） ====================
 async function loadData(forceUpdate = false) {
   try {
-    const verResp = await fetch('https://data.cloudgj.cn/version.txt');
+    const verResp = await fetch('https://cloudgj.cn/data/version.txt');
     if (!verResp.ok) throw new Error('版本检查失败');
     const remoteVersion = parseInt((await verResp.text()).trim());
     
@@ -121,7 +121,7 @@ async function loadData(forceUpdate = false) {
     }
     
     // ========== 以下为强制更新/首次下载流程 ==========
-    const dataResp = await fetch('https://data.cloudgj.cn/hcquick_data.json');
+    const dataResp = await fetch('https://cloudgj.cn/data/hcquick_data.json');
     if (!dataResp.ok) throw new Error('数据下载失败');
     const json = await dataResp.json();
     
@@ -516,7 +516,7 @@ async function showSettingsDialog() {
     if (radio) radio.checked = true;
 
     // 预填默认服务器地址
-    const DEFAULT_BASE = 'https://data.cloudgj.cn/';
+    const DEFAULT_BASE = 'https://cloudgj.cn/data/';
     const DEFAULT_DATA_FILE = 'hcquick_data.json';
     const DEFAULT_VERSION_FILE = 'version.txt';
     const baseUrl = await getMeta('custom_base_url') || DEFAULT_BASE;
@@ -889,7 +889,7 @@ document.getElementById('sync-confirm-cancel').addEventListener('click', () => {
 async function forceSyncAndReload() {
     try {
         // 直接下载完整 JSON，跳过版本检查
-        const dataResp = await fetch('https://data.cloudgj.cn/hcquick_data.json');
+        const dataResp = await fetch('https://cloudgj.cn/data/hcquick_data.json');
         if (!dataResp.ok) throw new Error('数据下载失败');
         const json = await dataResp.json();
         
@@ -912,7 +912,7 @@ async function forceSyncAndReload() {
 
         
                        // 4. 更新版本号
-        const verResp = await fetch('https://data.cloudgj.cn/version.txt');
+        const verResp = await fetch('https://cloudgj.cn/data/version.txt');
         if (verResp.ok) {
             const remoteVersion = parseInt((await verResp.text()).trim());
             await putMeta('local_version', String(json.version || remoteVersion));
