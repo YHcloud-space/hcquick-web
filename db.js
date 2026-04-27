@@ -1,6 +1,6 @@
 // ==================== IndexedDB 数据库模块 ====================
 const DB_NAME = 'hcquick_db';
-const DB_VERSION = 2; // 版本升级
+const DB_VERSION = 3; // 版本升级
 
 let db = null;
 
