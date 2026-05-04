@@ -1,14 +1,16 @@
-const CACHE_NAME = 'hcquick-v10';  // ✅ 版本号升级
+const CACHE_NAME = 'hcquick-v11';  // ✅ 版本号升级
 
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/db.js',
-  '/brand-spec.js',
-  '/material-calc.js',
-  '/manifest.json'
-];
+  '/mobile/',                         // 主路径
+  '/mobile/index.html',
+  '/mobile/style.css',
+  '/mobile/db.js',
+  '/mobile/brand-spec.js',
+  '/mobile/material-calc.js',
+  '/mobile/manifest.json',
+  '/mobile/icon-192.png',             // 🔔 添加图标
+  '/mobile/icon-512.png'  
+  ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
