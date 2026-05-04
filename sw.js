@@ -9,7 +9,7 @@ const urlsToCache = [
   '/mobile/material-calc.js',
   '/mobile/manifest.json',
   '/mobile/icon-192.png',             // 🔔 添加图标
-  '/mobile/icon-512.png'  
+  '/mobile/icon-512.png.png'  
   ];
 
 self.addEventListener('install', event => {
