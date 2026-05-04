@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hcquick-v13';  // ⬆️ 再升级版本，强制更新
+const CACHE_NAME = 'hcquick-v14';  // ⬆️ 再升级版本，强制更新
 
 const urlsToCache = [
   '/mobile/',
