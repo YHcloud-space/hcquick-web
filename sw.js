@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hcquick-v11';  // ✅ 版本号升级
+const CACHE_NAME = 'hcquick-v12';  // ✅ 版本号升级
 
 const urlsToCache = [
   '/mobile/',                         // 主路径
