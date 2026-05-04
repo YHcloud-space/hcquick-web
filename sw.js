@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hcquick-v12';  // ⬆️ 升级版本，强制刷新
+const CACHE_NAME = 'hcquick-v13';  // ⬆️ 再升级版本，强制更新
 
 const urlsToCache = [
   '/mobile/',
@@ -32,10 +32,20 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+
+  // ✅ 跳过 data.cloudgj.cn 的所有请求，直接走网络（避免跨域缓存问题）
+  if (url.hostname === 'data.cloudgj.cn') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // 原有 force-reload 跳过缓存逻辑
   if (url.searchParams.has('force-reload')) {
     event.respondWith(fetch(event.request));
     return;
   }
+
+  // 其他请求走缓存优先
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
