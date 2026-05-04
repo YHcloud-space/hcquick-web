@@ -1,22 +1,22 @@
-const CACHE_NAME = 'hcquick-v12';  // ✅ 版本号升级
+const CACHE_NAME = 'hcquick-v12';  // ⬆️ 升级版本，强制刷新
 
 const urlsToCache = [
-  '/mobile/',                         // 主路径
+  '/mobile/',
   '/mobile/index.html',
   '/mobile/style.css',
   '/mobile/db.js',
   '/mobile/brand-spec.js',
   '/mobile/material-calc.js',
   '/mobile/manifest.json',
-  '/mobile/icon-192.png',             // 🔔 添加图标
-  '/mobile/icon-512.png'  
-  ];
+  '/mobile/icon-192.png',
+  '/mobile/icon-512.png'
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
-  self.skipWaiting();  // ✅ 立即激活
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -27,20 +27,16 @@ self.addEventListener('activate', event => {
       );
     })
   );
-  self.clients.claim();  // ✅ 立即接管所有页面
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
-    
-    // 如果 URL 中包含 ?force-reload，跳过缓存，直接走网络
-    if (url.searchParams.has('force-reload')) {
-        event.respondWith(fetch(event.request));
-        return;
-    }
-    
-    // 否则走缓存优先策略
-    event.respondWith(
-        caches.match(event.request).then(cached => cached || fetch(event.request))
-    );
+  const url = new URL(event.request.url);
+  if (url.searchParams.has('force-reload')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  event.respondWith(
+    caches.match(event.request).then(cached => cached || fetch(event.request))
+  );
 });
