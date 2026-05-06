@@ -1,6 +1,6 @@
 // sw.js - 在 /mobile/ 目录下
 
-const CACHE_NAME = 'hcquick-v3'; // 升级版本号
+const CACHE_NAME = 'hcquick-v5'; // 升级版本号
 
 // 仅缓存本站核心文件，不缓存外部或可能失败的文件
 const urlsToCache = [
