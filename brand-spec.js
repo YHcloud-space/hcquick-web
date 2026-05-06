@@ -131,7 +131,7 @@ async function loadData(forceUpdate = false) {
     const oldMaterials = await getAll('materials');
     const specRemarks = {};
 oldSpecs.forEach(s => { if (s.remark) specRemarks[`${s.brand_id}_${s.name}`] = s.remark; });
-    const materialRemarks = {};
+const materialRemarks = {};
 oldMaterials.forEach(m => {
     if (m.remark) {
         const key = `${m.material_type}_${m.spec_id}_${m.custom_name}`;
@@ -903,9 +903,14 @@ async function forceSyncAndReload() {
         const oldSpecs = await getAll('specs');
         const oldMaterials = await getAll('materials');
         const specRemarks = {};
-        oldSpecs.forEach(s => { if (s.remark) specRemarks[s.id] = s.remark; });
-        const materialRemarks = {};
-        oldMaterials.forEach(m => { if (m.remark) materialRemarks[m.id] = { remark: m.remark, type: m.material_type }; });
+oldSpecs.forEach(s => { if (s.remark) specRemarks[`${s.brand_id}_${s.name}`] = s.remark; });
+const materialRemarks = {};
+oldMaterials.forEach(m => {
+    if (m.remark) {
+        const key = `${m.material_type}_${m.spec_id}_${m.custom_name}`;
+        materialRemarks[key] = m.remark;
+    }
+});
 
         // 2. 全量覆盖 IndexedDB
         await clearAndPutAll('brands', json.brands || []);
