@@ -513,7 +513,7 @@ async function showSettingsDialog() {
     menuVisible = false;
     document.getElementById('dropdown-menu').style.display = 'none';
     document.getElementById('settings-data-version').textContent = localVersion || '-';
-    document.getElementById('settings-apk-version').textContent = '1.0.3';
+    document.getElementById('settings-apk-version').textContent = '1.0.5';
 
     // 默认选中“云盘版”
     const currentMode = await getMeta('sync_mode') || 'netdisk';
